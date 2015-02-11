@@ -1,0 +1,33 @@
+{
+	"camera": {
+		"position": {"x": 10.0, "y": 10.0 , "z": 10.0},
+		"direction": {"x": -1.0,"y": -1.0,"z": -1.0},
+		"up": {"x": 1.0, "y": 1.0,"z": 1.0}
+	},
+	"viewplane": {
+		"distance": 1.0,
+		"width": 1024,
+		"height": 768
+	},
+	"scene": {
+		"objects": [
+			{
+				"position": {"x": 1.0,"y": 1.0,"z":1.0},
+				"type": "sphere",
+				"properties": {
+					"radius": 0.75
+				}
+			},
+			{
+				"position": {"x": 4.0,"y": 1.0,"z": -2.0},
+				"type": "box",
+				"properties": {
+					"width": 0.8,
+					"height": 1.0,
+					"depth": 0.8
+				}
+			}
+		],
+		"lights": []
+	}
+}
