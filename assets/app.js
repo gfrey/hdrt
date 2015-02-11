@@ -7,8 +7,13 @@ var app = {
       console.log("initializing javascript app");
       app.connect();
 
-      $('[data-role=render-btn]').click(function(e) {
+      $('[data-role=render]').click(function(e) {
         app.sendWorldDesc();
+        e.preventDefault();
+      });
+
+      $('[data-role=abort]').click(function(e) {
+        app.abortRendering();
         e.preventDefault();
       });
   };
@@ -28,13 +33,7 @@ var app = {
     con.onmessage = function (e) {
       console.log("onmessage " + e.data);
       var message = e.data;
-      // TODO check if IMG...
-      if(message.startsWith("IMG")) {
-        var imagePath = message.replace("IMG","")
-        app.displayImage(imagePath) 
-      } else {
-        alert("UNSUPPORTED MESSAGE: " + message);
-      }
+      app.handleMessage(message);
     };
 
     app.wsConnection = con;
@@ -48,11 +47,25 @@ var app = {
   app.send = function (msg) {
     console.log("will send: '" + msg + "'");
     app.wsConnection.send(msg);
+    console.log("did send: '" + msg + "'");
   };
 
   app.getWorldDesc = function () {
     var worldDesc = $("#editor").val();
     return worldDesc;
+  };
+
+  app.handleMessage = function (message) {
+    if(message.startsWith("IMG")) {
+      var imagePath = message.replace("IMG","")
+      app.displayImage(imagePath) 
+    } else {
+      alert("UNSUPPORTED MESSAGE: " + message);
+    }
+  };
+
+  app.abortRendering = function () {
+    app.send("ABORT");
   };
 
   app.displayImage = function (imageName) {
