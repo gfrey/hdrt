@@ -1,0 +1,35 @@
+{
+  camera: {
+    position: {x,y,z},
+    direction: {x,y,z},
+    up: {x,y,z},
+  },
+  viewplane: {
+    distance:,
+    width:,
+    height:,
+  }
+  scene: {
+    objects: [
+      {
+        position: {x,y,z},
+        type: 'sphere',
+        properties: {
+          radius:,
+        },
+      },
+      {
+        position: {x,y,z},
+        type: 'box',
+        properties: {
+          width:,
+          height,
+          depth:,
+        },
+      },
+    ],
+    lights: [],
+  }
+
+
+}
