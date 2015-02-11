@@ -22,6 +22,13 @@ type pixel struct {
 	dir  *Vector
 }
 
+func (wrld *World) Validate() error {
+	if wrld.Viewplane == nil {
+		return fmt.Errorf("viewplane not set")
+	}
+	return nil
+}
+
 const NUM_PARALLEL = 8
 
 func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, path string) {

@@ -42,5 +42,5 @@ func (r *Renderer) LoadWorldFromReader(rd io.Reader) error {
 	if err != nil {
 		return fmt.Errorf("failed to decode world: %s", err)
 	}
-	return nil
+	return r.wrld.Validate()
 }
