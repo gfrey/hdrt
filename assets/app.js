@@ -36,7 +36,7 @@ var app = {
 
   app.sendWorldDesc = function () {
       var wd = app.getWorldDesc();
-      app.send(wd);
+      app.send("CFG"+wd);
   };
   
   app.send = function (msg) {

@@ -32,7 +32,7 @@ func HTTPError(w http.ResponseWriter, err error, status int) {
 
 func WSError(ws *websocket.Conn, err error) {
 	logger.Printf("ERROR on websocket: %s", err.Error())
-	ws.Write([]byte(err.Error()))
+	websocket.Message.Send(ws, "ERR"+err.Error())
 }
 
 func registerStaticHandlers(mux *http.ServeMux, folder string) {
