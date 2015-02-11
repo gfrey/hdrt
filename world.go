@@ -27,6 +27,11 @@ func (wrld *World) Validate() error {
 	if wrld.Viewplane == nil {
 		return fmt.Errorf("viewplane not set")
 	}
+
+	if wrld.Viewplane.Width == 0 || wrld.Viewplane.Height == 0 {
+		return fmt.Errorf("width or height (%dx%d)", wrld.Viewplane.Width, wrld.Viewplane.Height)
+	}
+
 	return nil
 }
 
