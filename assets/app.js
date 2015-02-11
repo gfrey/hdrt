@@ -7,7 +7,7 @@ var app = {
       console.log("initializing javascript app");
       app.connect();
 
-      $('#render-btn').click(function(e) {
+      $('[data-role=render-btn]').click(function(e) {
         app.sendWorldDesc();
         e.preventDefault();
       });
