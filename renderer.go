@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 )
 
@@ -47,6 +48,8 @@ func (r *Renderer) LoadWorldFromReader(rd io.Reader) error {
 
 func (r *Renderer) Abort() {
 	if r.abort != nil {
+		log.Printf("closing abort channel")
 		close(r.abort)
+		r.abort = nil
 	}
 }

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
@@ -15,37 +14,34 @@ func ListenHandler(renderDir string) http.Handler {
 			logger.Printf("web socket connection!! renderDir: %s ", renderDir)
 
 			var msg string
-			var r *hdrt.Renderer
+			r := new(hdrt.Renderer)
 			for {
 				websocket.Message.Receive(ws, &msg)
 				switch {
 				case strings.HasPrefix(msg, "ABORT"):
-					log.Printf("aborting everything")
-					if r != nil {
-						r.Abort()
-					}
-					return nil
+					r.Abort()
 				case strings.HasPrefix(msg, "CFG"):
-					r = new(hdrt.Renderer)
+					r.Abort()
+					go func(msg string) {
+						buf := strings.NewReader(msg[3:])
+						err := r.LoadWorldFromReader(buf)
+						if err != nil {
+							WSError(ws, err)
+							return
+						}
 
-					buf := strings.NewReader(msg[3:])
-					err := r.LoadWorldFromReader(buf)
-					if err != nil {
-						WSError(ws, err)
-						continue
-					}
+						logger.Printf("--> start rendering")
+						ch, err := r.Render(renderDir)
+						if err != nil {
+							WSError(ws, err)
+							return
+						}
 
-					logger.Printf("--> start rendering")
-					ch, err := r.Render(renderDir)
-					if err != nil {
-						WSError(ws, err)
-						continue
-					}
-
-					for imagePath := range ch {
-						logger.Printf("send image path %s", imagePath)
-						websocket.Message.Send(ws, "IMG"+imagePath)
-					}
+						for imagePath := range ch {
+							logger.Printf("send image path %s", imagePath)
+							websocket.Message.Send(ws, "IMG"+imagePath)
+						}
+					}(msg)
 				}
 			}
 

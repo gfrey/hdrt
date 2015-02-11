@@ -41,28 +41,44 @@ const NUM_PARALLEL = 8
 func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, renderDir string) {
 	pixelInChan := make(chan *pixel)
 	pixelOutChan := make(chan *pixel)
-	go func(pc chan<- *pixel) {
+	go func(pc chan<- *pixel, ac <-chan struct{}) {
 		for y := 0; y < wrld.Viewplane.Height; y++ {
 			for x := 0; x < wrld.Viewplane.Width; x++ {
-				pc <- &pixel{x: x, y: y, dir: wrld.dirForPixel(x, y)}
+				select {
+				case <-ac:
+					log.Printf("aborting pixel generator")
+					close(pc)
+					return
+				default:
+					pc <- &pixel{x: x, y: y, dir: wrld.dirForPixel(x, y)}
+				}
 			}
 		}
 		close(pc)
-	}(pixelInChan)
+	}(pixelInChan, abortChan)
 
 	go func() {
 		wg := new(sync.WaitGroup)
 		for i := 0; i < NUM_PARALLEL; i++ {
 			wg.Add(1)
-			go func(pinc <-chan *pixel, poutc chan<- *pixel) {
+			go func(wg *sync.WaitGroup, pinc <-chan *pixel, poutc chan<- *pixel, ac <-chan struct{}, i int) {
+				log.Printf("starting worker %d", i)
 				defer wg.Done()
 				for pxl := range pinc {
-					wrld.renderPixel(pxl)
-					poutc <- pxl
+					select {
+					case <-ac:
+						log.Printf("aborting pixel worker %d", i)
+						return
+					default:
+						wrld.renderPixel(pxl)
+						poutc <- pxl
+					}
 				}
-			}(pixelInChan, pixelOutChan)
+			}(wg, pixelInChan, pixelOutChan, abortChan, i)
 		}
+		log.Printf("waiting for wait group")
 		wg.Wait()
+		log.Printf("wait group closed")
 		close(pixelOutChan)
 	}()
 
@@ -71,10 +87,6 @@ func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, rende
 RENDER_LOOP:
 	for {
 		select {
-		case <-abortChan:
-			close(pixelInChan)
-			log.Printf("aborting computation")
-			return
 		case pxl, ok := <-pixelOutChan:
 			if !ok {
 				break RENDER_LOOP
