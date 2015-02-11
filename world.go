@@ -7,6 +7,7 @@ import (
 	"image/png"
 	"io/ioutil"
 	"log"
+	"path"
 	"time"
 )
 
@@ -31,7 +32,7 @@ func (wrld *World) Validate() error {
 
 const NUM_PARALLEL = 8
 
-func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, path string) {
+func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, renderDir string) {
 	pixelInChan := make(chan *pixel)
 	pixelOutChan := make(chan *pixel)
 	go func(pc chan<- *pixel) {
@@ -67,7 +68,7 @@ RENDER_LOOP:
 			img.Set(pxl.x, pxl.y, pxl.col)
 		case <-ticker:
 			err := func() error {
-				fh, err := ioutil.TempFile(path, "img")
+				fh, err := ioutil.TempFile(renderDir, "img")
 				if err != nil {
 					return fmt.Errorf("failed to create file: %s", err)
 				}
@@ -83,7 +84,7 @@ RENDER_LOOP:
 					return fmt.Errorf("failed to close file: %s", err)
 				}
 
-				evChan <- filename
+				evChan <- path.Base(filename)
 				return nil
 			}()
 			if err != nil {
