@@ -44,3 +44,9 @@ func (r *Renderer) LoadWorldFromReader(rd io.Reader) error {
 	}
 	return r.wrld.Validate()
 }
+
+func (r *Renderer) Abort() {
+	if r.abort != nil {
+		close(r.abort)
+	}
+}
