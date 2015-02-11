@@ -1,4 +1,4 @@
-package main
+package hdrt
 
 type Camera struct {
 	Position  Vector
