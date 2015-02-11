@@ -17,7 +17,7 @@ func Router(renderDir string) http.Handler {
 	mux.Handle("/listen", websocket.Handler(ListenHandler))
 	registerStaticHandlers(mux, "assets")
 
-	mux.Handle("/renders", http.FileServer(http.Dir(renderDir)))
+	mux.Handle("/renders/", http.StripPrefix("/renders", http.FileServer(http.Dir(renderDir))))
 
 	return mux
 }
