@@ -1,4 +1,4 @@
-package main
+package hdrt
 
 type Vector struct {
 	X float64
