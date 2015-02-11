@@ -28,10 +28,28 @@ const RootTPL = `
 
 		<!-- Latest compiled and minified JavaScript -->
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+		<link rel="stylesheet" href="/styles.css">
 	</head>
 	<body>
-		<h1>Hallo Welt</h1>
-		<p>Hier kommt der Keks</p>
+		<div class="container">
+			<div class="page-header">
+				<h1>Ray Tracing</h1>
+				<p class="lead">Hier kommt der Keks</p>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div id="editor">
+						editor
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div id="scene">
+						scene
+					</div>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
 `
