@@ -7,16 +7,16 @@ import (
 	"text/template"
 )
 
-var RootTPL = func() []byte {
-	tpl, err := ioutil.ReadFile("tpl/root.html")
+var IndexTPL = func() []byte {
+	tpl, err := ioutil.ReadFile("tpl/index.html")
 	if err != nil {
-		panic("could not read tpl/root.html")
+		panic("could not read tpl/index.html")
 	}
 	return tpl
 }()
 
-func RootHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write(RootTPL)
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	_, err := w.Write(IndexTPL)
 
 	if err != nil {
 		HTTPError(w, err, 500)

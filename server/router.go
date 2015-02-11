@@ -14,7 +14,7 @@ import (
 func Router(renderDir string) http.Handler {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", RootHandler)
+	mux.HandleFunc("/", IndexHandler)
 	mux.Handle("/listen", ListenHandler(renderDir))
 	registerStaticHandlers(mux, "assets")
 
