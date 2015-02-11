@@ -20,6 +20,9 @@ const RootTPL = `
 <html>
 	<head>
 		<title>Ray Tracer</title>
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
 		<!-- Latest compiled and minified CSS -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 
@@ -30,6 +33,7 @@ const RootTPL = `
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 
 		<link rel="stylesheet" href="/styles.css">
+		<script src="/app.js"></script>
 	</head>
 	<body>
 		<div class="container">
