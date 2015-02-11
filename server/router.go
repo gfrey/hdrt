@@ -1,27 +1,44 @@
 package server
 
-import "net/http"
+import (
+	"mime"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+)
 
 func Router() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", RootHandler)
+	registerStaticHandlers(mux, "assets")
 
 	return mux
-}
-
-func RootHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("Miau"))
-
-	if err != nil {
-		HTTPError(w, err, 500)
-	}
-
-	return
 }
 
 func HTTPError(w http.ResponseWriter, err error, status int) {
 	logger.Printf("ERROR status=%d %s err=%s", status, http.StatusText(status), err.Error())
 	w.WriteHeader(status)
 	w.Write([]byte("error yeah"))
+}
+
+func registerStaticHandlers(mux *http.ServeMux, folder string) {
+	filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() || strings.HasPrefix(info.Name(), ".") {
+			return nil
+		}
+		route := strings.TrimPrefix(path, folder)
+		mux.HandleFunc(route, staticFileHander(path))
+		return nil
+	})
+}
+
+func staticFileHander(path string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ext := filepath.Ext(path)
+		w.Header().Set("Content-Type", mime.TypeByExtension(ext))
+
+		http.ServeFile(w, r, path)
+	}
 }
