@@ -43,9 +43,10 @@ const RootTPL = `
 			</div>
 			<div class="row">
 				<div class="col-md-6">
-					<div id="editor">
-						editor
-					</div>
+					<form>
+						<textarea id="editor"></textarea>
+						<button id="render-btn" class="btn btn-primary">Render</button>
+					</form>
 				</div>
 				<div class="col-md-6">
 					<div id="scene">

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"mime"
 	"net/http"
 	"os"
@@ -14,7 +15,7 @@ func Router(renderDir string) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", RootHandler)
-	mux.Handle("/listen", websocket.Handler(ListenHandler))
+	mux.Handle("/listen", ListenHandler(renderDir))
 	registerStaticHandlers(mux, "assets")
 
 	mux.Handle("/renders/", http.StripPrefix("/renders", http.FileServer(http.Dir(renderDir))))
@@ -25,7 +26,13 @@ func Router(renderDir string) http.Handler {
 func HTTPError(w http.ResponseWriter, err error, status int) {
 	logger.Printf("ERROR status=%d %s err=%s", status, http.StatusText(status), err.Error())
 	w.WriteHeader(status)
-	w.Write([]byte("error yeah"))
+	body := fmt.Sprintf("status=%d %s err=%s", status, http.StatusText(status), err)
+	w.Write([]byte(body))
+}
+
+func WSError(ws *websocket.Conn, err error) {
+	logger.Printf("ERROR on websocket: %s", err.Error())
+	ws.Write([]byte(err.Error()))
 }
 
 func registerStaticHandlers(mux *http.ServeMux, folder string) {

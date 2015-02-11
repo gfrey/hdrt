@@ -13,7 +13,7 @@ type Renderer struct {
 	abort  chan struct{}
 }
 
-func (r *Renderer) Render(path string) (<-chan string, error) {
+func (r *Renderer) Render(renderDir string) (<-chan string, error) {
 	if r.wrld == nil {
 		return nil, fmt.Errorf("world not loaded yet")
 	}
@@ -21,7 +21,7 @@ func (r *Renderer) Render(path string) (<-chan string, error) {
 	r.evChan = make(chan string)
 	r.abort = make(chan struct{})
 
-	go r.wrld.Render(r.evChan, r.abort, path)
+	go r.wrld.Render(r.evChan, r.abort, renderDir)
 
 	return r.evChan, nil
 }

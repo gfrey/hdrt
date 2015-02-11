@@ -6,6 +6,11 @@ var app = {
   app.init = function () {
       console.log("initializing javascript app");
       app.connect();
+
+      $('#render-btn').click(function(e) {
+        app.sendWorldDesc();
+        e.preventDefault();
+      });
   };
 
   app.connect = function () {
@@ -14,7 +19,6 @@ var app = {
 
     con.onopen = function () {
       console.log("onopen");
-      con.send("Ping"); 
     };
 
     con.onerror = function (error) {
@@ -23,8 +27,29 @@ var app = {
 
     con.onmessage = function (e) {
       console.log("onmessage " + e.data);
+      var imagePath = e.data;
+      alert("onmessage: " + imagePath);
     };
+
+    app.wsConnection = con;
+  };
+
+  app.sendWorldDesc = function () {
+      var wd = app.getWorldDesc();
+      app.send(wd);
+  };
+  
+  app.send = function (msg) {
+    console.log("will send: '" + msg + "'");
+    app.wsConnection.send(msg);
+  };
+
+  app.getWorldDesc = function () {
+    var worldDesc = $("#editor").val();
+    return worldDesc;
   };
 })();
 
-app.init();
+$(document).ready(function() {
+  app.init();
+});
