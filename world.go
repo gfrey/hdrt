@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"path"
+	"sync"
 	"time"
 )
 
@@ -41,24 +42,32 @@ func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, rende
 	pixelInChan := make(chan *pixel)
 	pixelOutChan := make(chan *pixel)
 	go func(pc chan<- *pixel) {
-		for x := 0; x < wrld.Viewplane.Width; x++ {
-			for y := 0; y < wrld.Viewplane.Height; y++ {
+		for y := 0; y < wrld.Viewplane.Height; y++ {
+			for x := 0; x < wrld.Viewplane.Width; x++ {
 				pc <- &pixel{x: x, y: y, dir: wrld.dirForPixel(x, y)}
 			}
 		}
+		close(pc)
 	}(pixelInChan)
 
-	for i := 0; i < NUM_PARALLEL; i++ {
-		go func(pinc <-chan *pixel, poutc chan<- *pixel) {
-			for pxl := range pinc {
-				wrld.renderPixel(pxl)
-				poutc <- pxl
-			}
-		}(pixelInChan, pixelOutChan)
-	}
+	go func() {
+		wg := new(sync.WaitGroup)
+		for i := 0; i < NUM_PARALLEL; i++ {
+			wg.Add(1)
+			go func(pinc <-chan *pixel, poutc chan<- *pixel) {
+				defer wg.Done()
+				for pxl := range pinc {
+					wrld.renderPixel(pxl)
+					poutc <- pxl
+				}
+			}(pixelInChan, pixelOutChan)
+		}
+		wg.Wait()
+		close(pixelOutChan)
+	}()
 
 	img := image.NewRGBA(image.Rect(0, 0, wrld.Viewplane.Width, wrld.Viewplane.Height))
-	ticker := time.Tick(2 * time.Second)
+	ticker := time.NewTicker(2 * time.Second)
 RENDER_LOOP:
 	for {
 		select {
@@ -71,36 +80,47 @@ RENDER_LOOP:
 				break RENDER_LOOP
 			}
 			img.Set(pxl.x, pxl.y, pxl.col)
-		case <-ticker:
-			err := func() error {
-				fh, err := ioutil.TempFile(renderDir, "img")
-				if err != nil {
-					return fmt.Errorf("failed to create file: %s", err)
-				}
-
-				err = png.Encode(fh, img)
-				if err != nil {
-					return fmt.Errorf("failed to create file: %s", err)
-				}
-
-				filename := fh.Name()
-				err = fh.Close()
-				if err != nil {
-					return fmt.Errorf("failed to close file: %s", err)
-				}
-
+		case <-ticker.C:
+			filename, err := imgSave(renderDir, img)
+			switch err {
+			case nil:
 				evChan <- path.Base(filename)
-				return nil
-			}()
-			if err != nil {
+			default:
 				log.Printf("ERR: %s", err)
 			}
 		}
 	}
+	filename, err := imgSave(renderDir, img)
+	if err != nil {
+		log.Printf("ERR: %s", err)
+	}
+	evChan <- path.Base(filename)
 	close(evChan)
 }
 
+func imgSave(renderDir string, img *image.RGBA) (string, error) {
+	fh, err := ioutil.TempFile(renderDir, "img")
+	if err != nil {
+		return "", fmt.Errorf("failed to create file: %s", err)
+	}
+
+	err = png.Encode(fh, img)
+	if err != nil {
+		return "", fmt.Errorf("failed to create file: %s", err)
+	}
+
+	filename := fh.Name()
+	err = fh.Close()
+	if err != nil {
+		return "", fmt.Errorf("failed to close file: %s", err)
+	}
+
+	return filename, nil
+
+}
+
 func (wrld *World) renderPixel(pxl *pixel) {
+	time.Sleep(50 * time.Millisecond)
 	pxl.col = &color.RGBA{200, 0, 0, 255}
 }
 
