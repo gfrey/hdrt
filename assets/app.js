@@ -27,8 +27,14 @@ var app = {
 
     con.onmessage = function (e) {
       console.log("onmessage " + e.data);
-      var imagePath = e.data;
-      alert("onmessage: " + imagePath);
+      var message = e.data;
+      // TODO check if IMG...
+      if(message.startsWith("IMG")) {
+        var imagePath = message.replace("IMG","")
+        app.displayImage(imagePath) 
+      } else {
+        alert("UNSUPPORTED MESSAGE: " + message);
+      }
     };
 
     app.wsConnection = con;
@@ -47,6 +53,12 @@ var app = {
   app.getWorldDesc = function () {
     var worldDesc = $("#editor").val();
     return worldDesc;
+  };
+
+  app.displayImage = function (imageName) {
+    console.log('displaying image: ' + imageName);
+    var path = "/renders/" + imageName;
+    $("#scene img").attr("src", path);
   };
 })();
 

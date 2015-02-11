@@ -7,3 +7,7 @@
   background-color: black;
   color: white;
 }
+
+#scene img {
+  max-width: 100%;
+}
