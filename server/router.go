@@ -10,12 +10,14 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-func Router() http.Handler {
+func Router(renderDir string) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", RootHandler)
 	mux.Handle("/listen", websocket.Handler(ListenHandler))
 	registerStaticHandlers(mux, "assets")
+
+	mux.Handle("/renders", http.FileServer(http.Dir(renderDir)))
 
 	return mux
 }
