@@ -83,8 +83,8 @@ func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, rende
 	pixelInChan := make(chan *pixel)
 	pixelOutChan := make(chan *pixel)
 	go func(pc chan<- *pixel, ac <-chan struct{}) {
-		for y := 0; y < wrld.Viewplane.ResX; y++ {
-			for x := 0; x < wrld.Viewplane.ResY; x++ {
+		for y := 0; y < wrld.Viewplane.ResY; y++ {
+			for x := 0; x < wrld.Viewplane.ResX; x++ {
 				select {
 				case <-ac:
 					log.Printf("aborting pixel generator")
