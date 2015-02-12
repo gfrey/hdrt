@@ -41,11 +41,11 @@ func VectorScalarMultiply(v *Vector, a float64) *Vector {
 }
 
 func VectorMultiply(v1 *Vector, v2 *Vector) *Vector {
-    return NewVector(v1[0]*v2[0], v1[1]*v2[1], v1[2]*v2[2])
+	return NewVector(v1[0]*v2[0], v1[1]*v2[1], v1[2]*v2[2])
 }
 
 func VectorScalarDivide(v *Vector, a float64) *Vector {
-    return NewVector(v[0]/a, v[1]/a, v[2]/a)
+	return NewVector(v[0]/a, v[1]/a, v[2]/a)
 }
 
 func (v *Vector) ScalarMultiply(a float64) {
@@ -65,13 +65,13 @@ func (v *Vector) Add(other *Vector) {
 }
 
 func VectorSub(a, b *Vector) *Vector {
-    return NewVector(a[0]-b[0], a[1]-b[1], a[2]-b[2])
+	return NewVector(a[0]-b[0], a[1]-b[1], a[2]-b[2])
 }
 
 func (v *Vector) Sub(other *Vector) {
-    v[0] -= other[0]
-    v[1] -= other[1]
-    v[2] -= other[2]
+	v[0] -= other[0]
+	v[1] -= other[1]
+	v[2] -= other[2]
 }
 
 func VectorCross(a, b *Vector) *Vector {
@@ -85,7 +85,7 @@ func VectorCross(a, b *Vector) *Vector {
 }
 
 func VectorDot(a, b *Vector) float64 {
-    return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
+	return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
 }
 
 func VectorNormalize(a *Vector) *Vector {
@@ -103,20 +103,20 @@ func (v *Vector) Normalize() {
 }
 
 func VectorProject(v *Vector, u *Vector) *Vector {
-    vu := VectorMultiply(v, u)
-    vl := v.Length()
+	vu := VectorMultiply(v, u)
+	vl := v.Length()
 
-    puv := VectorMultiply(VectorScalarDivide(vu, vl), v)
+	puv := VectorMultiply(VectorScalarDivide(vu, vl), v)
 
-    return puv
+	return puv
 }
 
 func (v *Vector) Length() float64 {
-    return math.Sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
+	return math.Sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
 }
 
 func (v *Vector) DistanceTo(v2 *Vector) float64 {
-    return VectorSub(v2, v).Length()
+	return VectorSub(v2, v).Length()
 }
 
 var epsilon = 0.0001
