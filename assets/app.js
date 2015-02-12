@@ -8,6 +8,7 @@ var app = {
       app.connect();
 
       $('[data-role=render]').click(function(e) {
+        app.resetImage();
         app.sendWorldDesc();
         e.preventDefault();
       });
@@ -72,6 +73,10 @@ var app = {
     console.log('displaying image: ' + imageName);
     var path = "/renders/" + imageName;
     $("#scene img").attr("src", path);
+  };
+
+  app.resetImage = function () {
+    $("#scene img").attr("src", "http://fillmurray.com/600/300");
   };
 })();
 
