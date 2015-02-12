@@ -31,13 +31,29 @@ func (sc *Scene) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type intersection struct {
+	d   float64
+	obj Object
+}
+
 func (sc *Scene) Render(pos, dir *Vector) *color.RGBA {
+	var (
+		cand     Object
+		distance float64
+	)
 	for i := range sc.Objects {
 		o := sc.Objects[i]
 		ipos := o.Intersect(pos, dir)
 		if ipos != nil {
-			return o.GetColor()
+			d := (ipos[0] - pos[0]) / dir[0]
+			if cand == nil || d < distance {
+				cand = sc.Objects[i]
+				distance = d
+			}
 		}
+	}
+	if cand != nil {
+		return cand.GetColor()
 	}
 	return &color.RGBA{255, 0, 0, 255}
 }
