@@ -42,7 +42,7 @@ func (sc *Scene) Render(pos, dir *Vector) *color.RGBA {
 
 type rawObject struct {
 	Type       string
-	Position   Vector
+	Position   *Vector
 	Properties json.RawMessage
 	obj        Object
 }
@@ -50,7 +50,7 @@ type rawObject struct {
 func (robj *rawObject) UnmarshalJSON(data []byte) error {
 	tobj := &struct {
 		Type       string
-		Position   Vector
+		Position   *Vector
 		Properties json.RawMessage
 	}{}
 	err := json.Unmarshal(data, &tobj)
@@ -79,7 +79,7 @@ type Object interface {
 }
 
 type BaseObject struct {
-	Position Vector
+	Position *Vector
 }
 
 type objSphere struct {
