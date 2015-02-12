@@ -1,5 +1,6 @@
 var app = {
   WEBSOCKET_URL: "ws://127.0.0.1:3000/listen",
+  STORE_JSON_KEY: "json_content",
 };
 
 (function() {
@@ -11,12 +12,16 @@ var app = {
         app.resetImage();
         app.sendWorldDesc();
         e.preventDefault();
+        return false;
       });
 
       $('[data-role=abort]').click(function(e) {
         app.abortRendering();
         e.preventDefault();
+        return false;
       });
+
+      app.initEditor();
   };
 
   app.connect = function () {
@@ -41,8 +46,9 @@ var app = {
   };
 
   app.sendWorldDesc = function () {
-      var wd = app.getWorldDesc();
-      app.send("CFG"+wd);
+    app.saveJSON();
+    var wd = app.getWorldDesc();
+    app.send("CFG"+wd);
   };
   
   app.send = function (msg) {
@@ -52,8 +58,8 @@ var app = {
   };
 
   app.getWorldDesc = function () {
-    var worldDesc = $("#editor").val();
-    return worldDesc;
+    var worldDesc = app.editor.get();
+    return JSON.stringify(worldDesc);
   };
 
   app.handleMessage = function (message) {
@@ -84,6 +90,39 @@ var app = {
 
     $("#scene img").attr("src", "http://fillmurray.com/" + w + "/" + h);
   };
+
+  app.initEditor = function () {
+    var container = document.querySelector("#editor");
+    var options = {
+       mode: 'code',
+        modes: ['code', 'form', 'text', 'tree', 'view'], // allowed modes
+        error: function (err) {
+          alert(err.toString());
+        }
+    };
+    var json = {};
+
+    app.editor = new JSONEditor(container, options, json);
+    app.loadJSON();
+  };
+
+  app.loadJSON = function() {
+  console.log("loading json");
+    var jsontext = localStorage.getItem(app.STORE_JSON_KEY);
+    if(jsontext == "" || jsontext == null || jsontext == undefined) {
+        jsontext = "{}";
+    }
+    var json = JSON.parse(jsontext);
+    app.editor.set(json);
+  };
+
+  app.saveJSON = function() {
+    console.log("saving json");
+    var json = app.editor.get();
+    var jsontext = JSON.stringify(json);
+        localStorage.setItem(app.STORE_JSON_KEY, jsontext);
+  };
+
 })();
 
 $(document).ready(function() {
