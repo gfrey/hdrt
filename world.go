@@ -154,5 +154,6 @@ func (wrld *World) renderPixel(pxl *pixel) {
 }
 
 func (wrld *World) dirForPixel(x, y int) *Vector {
-	return nil
+	positionPixel := wrld.Viewplane.PixelPosition(x, y)
+	return VectorAdd(positionPixel, VectorScalarMultiply(wrld.Camera.Position, -1.0))
 }

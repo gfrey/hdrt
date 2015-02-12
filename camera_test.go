@@ -15,33 +15,29 @@ func TestViewplaneInit(t *testing.T) {
 
 	v.span(c)
 
-	if v.pos[0] != 1.0 {
-		t.Errorf("expected v.pos[0] = %.2f, got %.2f", 1.0, v.pos[0])
-	}
-	if v.pos[1] != 0.5 {
-		t.Errorf("expected v.pos[1] = %.2f, got %.2f", 0.5, v.pos[1])
-	}
-	if v.pos[2] != -0.5 {
-		t.Errorf("expected v.pos[2] = %.2f, got %.2f", -0.5, v.pos[2])
+	posExp := NewVector(1.0, 0.5, -0.5)
+	if !VectorEqual(v.pos, posExp, epsilon) {
+		t.Errorf("expected v.pos = %s, got %s", posExp, v.pos)
 	}
 
-	if v.a[0] != 0.0 {
-		t.Errorf("expected v.a[0] = %.2f, got %.2f", 0.0, v.a[0])
-	}
-	if v.a[1] != 0.0 {
-		t.Errorf("expected v.a[1] = %.2f, got %.2f", 0.0, v.a[1])
-	}
-	if v.a[2] != 1.0 {
-		t.Errorf("expected v.a[2] = %.2f, got %.2f", 1.0, v.a[2])
+	aExp := NewVector(0.0, 0.0, 1.0)
+	if !VectorEqual(v.a, aExp, epsilon) {
+		t.Errorf("expected v.a = %s, got %s", aExp, v.a)
 	}
 
-	if v.b[0] != 0.0 {
-		t.Errorf("expected v.b[0] = %.2f, got %.2f", 0.0, v.b[0])
+	bExp := NewVector(0.0, -1.0, 0.0)
+	if !VectorEqual(v.b, bExp, epsilon) {
+		t.Errorf("expected v.b = %s, got %s", bExp, v.b)
 	}
-	if v.b[1] != -1.0 {
-		t.Errorf("expected v.b[1] = %.2f, got %.2f", -1.0, v.b[1])
+
+	pixelPos1 := v.PixelPosition(0, 0)
+	if !VectorEqual(pixelPos1, posExp, epsilon) {
+		t.Errorf("expected pixelPos1 = %s, got %s", posExp, pixelPos1)
 	}
-	if v.b[2] != 0.0 {
-		t.Errorf("expected v.b[2] = %.2f, got %.2f", 0.0, v.b[2])
+
+	pixelPos2 := v.PixelPosition(v.ResX/2, v.ResY/2)
+	pixelPos2Exp := NewVector(1.0, 0.0, 0.0)
+	if !VectorEqual(pixelPos2, pixelPos2Exp, epsilon) {
+		t.Errorf("expected pixelPos2 = %s, got %s", pixelPos2Exp, pixelPos2)
 	}
 }

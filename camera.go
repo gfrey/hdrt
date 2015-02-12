@@ -43,5 +43,8 @@ func (v *Viewplane) span(c *Camera) {
 	v.a = VectorScalarMultiply(vpSide, a)
 	v.b = VectorScalarMultiply(vpTop, -b)
 	v.pos = VectorAdd(VectorAdd(vpCenter, VectorScalarMultiply(v.a, -0.5)), VectorScalarMultiply(v.b, -0.5))
+}
 
+func (v *Viewplane) PixelPosition(x, y int) *Vector {
+	return VectorAdd(VectorAdd(v.pos, VectorScalarMultiply(v.a, float64(x)/float64(v.ResX))), VectorScalarMultiply(v.b, float64(y)/float64(v.ResY)))
 }
