@@ -64,7 +64,7 @@ var app = {
 
   app.handleMessage = function (message) {
     if(message.startsWith("IMG")) {
-      var imagePath = message.replace("IMG","")
+      var imagePath = "/renders/" + message.replace("IMG","")
       app.displayImage(imagePath) 
     } else {
       alert("UNSUPPORTED MESSAGE: " + message);
@@ -77,8 +77,9 @@ var app = {
 
   app.displayImage = function (imageName) {
     console.log('displaying image: ' + imageName);
-    var path = "/renders/" + imageName;
+    var path = imageName;
     $("#scene img").attr("src", path);
+    $("#scene a").attr("href", path);
   };
 
   app.resetImage = function () {
@@ -88,7 +89,7 @@ var app = {
     w = 600;
     h = 600*ratio;
 
-    $("#scene img").attr("src", "http://fillmurray.com/" + w + "/" + h);
+    app.displayImage("http://fillmurray.com/" + w + "/" + h);
   };
 
   app.initEditor = function () {
