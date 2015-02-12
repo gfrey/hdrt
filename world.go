@@ -24,7 +24,24 @@ type pixel struct {
 	dir  *Vector
 }
 
-func (wrld *World) Validate() error {
+func (wrld *World) Init() error {
+	err := wrld.validate()
+	if err != nil {
+		return err
+	}
+
+	err = wrld.Camera.Init()
+	if err != nil {
+		return err
+	}
+	err = wrld.Viewplane.Init(wrld.Camera)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (wrld *World) validate() error {
 	if wrld.Viewplane == nil {
 		return fmt.Errorf("viewplane not set")
 	}

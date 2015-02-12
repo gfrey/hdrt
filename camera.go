@@ -9,6 +9,12 @@ type Camera struct {
 	FOV       float64 // angle in degree
 }
 
+func (c *Camera) Init() error {
+	c.Direction.Normalize()
+	c.Up.Normalize()
+	return nil
+}
+
 type Viewplane struct {
 	Distance   float64
 	ResX, ResY int
@@ -16,7 +22,12 @@ type Viewplane struct {
 	pos, a, b *Vector
 }
 
-func (v *Viewplane) Span(c *Camera) {
+func (v *Viewplane) Init(c *Camera) error {
+	v.span(c)
+	return nil
+}
+
+func (v *Viewplane) span(c *Camera) {
 	vpCenter := VectorAdd(c.Position, VectorScalarMultiply(c.Direction, v.Distance))
 
 	aspectRatio := float64(v.ResX) / float64(v.ResY)

@@ -43,7 +43,7 @@ func (r *Renderer) LoadWorldFromReader(rd io.Reader) error {
 	if err != nil {
 		return fmt.Errorf("failed to decode world: %s", err)
 	}
-	return r.wrld.Validate()
+	return r.wrld.Init()
 }
 
 func (r *Renderer) Abort() {

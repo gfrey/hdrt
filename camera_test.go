@@ -13,7 +13,7 @@ func TestViewplaneInit(t *testing.T) {
 	v.Distance = 1.0
 	v.ResX, v.ResY = 100, 100
 
-	v.Span(c)
+	v.span(c)
 
 	if v.pos[0] != 1.0 {
 		t.Errorf("expected v.pos[0] = %.2f, got %.2f", 1.0, v.pos[0])
