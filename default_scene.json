@@ -7,13 +7,14 @@
 	},
 	"viewplane": {
 		"distance": 1.0,
-		"resx": 1024,
-		"resy": 768
+		"resx": 128,
+		"resy": 128
 	},
 	"scene": {
 		"objects": [
             {
               "position": {"x": 50.0,"y": 0.0,"z":0.0},
+              "color": {"r": 0,"g": 255,"b":0, "a": 255},
               "type": "sphere",
               "properties": {
                 "radius": 0.75
@@ -21,6 +22,7 @@
             },
 			{
 				"position": {"x": 4.0,"y": 1.0,"z": -2.0},
+                "color": {"r": 0,"g": 0,"b":255, "a": 255},
 				"type": "box",
 				"properties": {
 					"width": 0.8,

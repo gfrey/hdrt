@@ -34,9 +34,10 @@ func (sc *Scene) UnmarshalJSON(data []byte) error {
 
 func (sc *Scene) Render(pos, dir *Vector) *color.RGBA {
 	for i := range sc.Objects {
-		ipos := sc.Objects[i].Intersect(pos, dir)
+		o := sc.Objects[i]
+		ipos := o.Intersect(pos, dir)
 		if ipos != nil {
-			return &color.RGBA{0, 0, 255, 255}
+			return o.GetColor()
 		}
 	}
 	return &color.RGBA{255, 0, 0, 255}
@@ -53,6 +54,7 @@ func (robj *rawObject) UnmarshalJSON(data []byte) error {
 	tobj := &struct {
 		Type       string
 		Position   *Vector
+		Color      *color.RGBA
 		Properties json.RawMessage
 	}{}
 	err := json.Unmarshal(data, &tobj)
@@ -63,11 +65,11 @@ func (robj *rawObject) UnmarshalJSON(data []byte) error {
 	switch tobj.Type {
 	case "sphere":
 		s := new(objSphere)
-		s.BaseObject = &BaseObject{Position: tobj.Position}
+		s.BaseObject = &BaseObject{Position: tobj.Position, Color: tobj.Color}
 		robj.obj = s
 	case "box":
 		b := new(objBox)
-		b.BaseObject = &BaseObject{Position: tobj.Position}
+		b.BaseObject = &BaseObject{Position: tobj.Position, Color: tobj.Color}
 		robj.obj = b
 	default:
 		return fmt.Errorf("type %q not supported", robj.Type)
@@ -77,11 +79,20 @@ func (robj *rawObject) UnmarshalJSON(data []byte) error {
 }
 
 type Object interface {
-	Intersect(pos *Vector, dir *Vector) (intersction *Vector) // returns nil on no intersection
+	Intersect(pos *Vector, dir *Vector) (intersection *Vector) // returns nil on no intersection
+	GetColor() *color.RGBA
 }
 
 type BaseObject struct {
 	Position *Vector
+	Color    *color.RGBA
+}
+
+func (o *BaseObject) GetColor() *color.RGBA {
+	if o.Color == nil {
+		return &color.RGBA{0, 0, 255, 255}
+	}
+	return o.Color
 }
 
 type objSphere struct {
