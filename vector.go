@@ -40,6 +40,14 @@ func VectorScalarMultiply(v *Vector, a float64) *Vector {
 	return NewVector(v[0]*a, v[1]*a, v[2]*a)
 }
 
+func VectorMultiply(v1 *Vector, v2 *Vector) *Vector {
+    return NewVector(v1[0]*v2[0], v1[1]*v2[1], v1[2]*v2[2])
+}
+
+func VectorScalarDivide(v *Vector, a float64) *Vector {
+    return NewVector(v[0]/a, v[1]/a, v[2]/a)
+}
+
 func (v *Vector) ScalarMultiply(a float64) {
 	v[0] *= a
 	v[1] *= a
@@ -88,10 +96,27 @@ func VectorNormalize(a *Vector) *Vector {
 }
 
 func (v *Vector) Normalize() {
-	l := math.Sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
+	l := v.Length()
 	v[0] /= l
 	v[1] /= l
 	v[2] /= l
+}
+
+func VectorProject(v *Vector, u *Vector) *Vector {
+    vu := VectorMultiply(v, u)
+    vl := v.Length()
+
+    puv := VectorMultiply(VectorScalarDivide(vu, vl), v)
+
+    return puv
+}
+
+func (v *Vector) Length() float64 {
+    return math.Sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
+}
+
+func (v *Vector) DistanceTo(v2 *Vector) float64 {
+    return VectorSub(v2, v).Length()
 }
 
 var epsilon = 0.0001

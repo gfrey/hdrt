@@ -67,12 +67,17 @@ func TestObjSphereIntersect(t *testing.T) {
 
     _, _ = rayPos, dir
 
-    o.Position = &Vector{0,0,0}
+    o.Position = &Vector{0.1,0,0}
     if o.Intersect(rayPos, dir) == nil {
         t.Errorf("did expect to intersect when sphere pos is %s, but did not", o.Position)
     }
 
-    o.Position = &Vector{5,0,0}
+    o.Position = &Vector{0.5,0,0}
+    if o.Intersect(rayPos, dir) == nil {
+        t.Errorf("did expect to intersect when sphere pos is %s, but did not", o.Position)
+    }
+
+    o.Position = &Vector{5,0.5,0}
     if o.Intersect(rayPos, dir) == nil {
         t.Errorf("did expect to intersect when sphere pos is %s, but did not", o.Position)
     }
@@ -82,7 +87,7 @@ func TestObjSphereIntersect(t *testing.T) {
         t.Errorf("did expect to intersect when sphere pos is %s, but did not", o.Position)
     }
 
-    o.Position = &Vector{5,1,0}
+    o.Position = &Vector{5,1.1,0}
     if o.Intersect(rayPos, dir) != nil {
         t.Errorf("did expect to NOT intersect when sphere pos is %s, but DID", o.Position)
     }

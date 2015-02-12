@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
-)
+    "github.com/dynport/dgtk/log")
 
 type Scene struct {
 	Objects []Object `json:"objects"`
@@ -89,7 +89,26 @@ type objSphere struct {
 
 func (o *objSphere) Intersect(p, d *Vector) *Vector {
     c := o.Position
-    v := VectorSub(p, c)
+    dc := VectorSub(c, p)
+    ddc := VectorDot(d, dc)
+
+    if ddc > 0 {
+        log.Debug("ddc > 0 | %.2f", ddc)
+        puv := VectorProject(d, c)
+        pc := VectorAdd(p, puv) // center of the sphere projected onto the ray
+        log.Debug("pc: %s", pc)
+
+        log.Debug("pc.DistanceTo(c)=%.2f o.Radius=%.2f", pc.DistanceTo(c), o.Radius)
+        if pc.DistanceTo(c) <= o.Radius {
+            // pc is intersection in the middle
+            // TODO return o.findFirstIntersectionPoint()
+            return pc
+        }
+    } else {
+        log.Log("SPHERE", "ddc <= 0 | %.2f", ddc)
+        // sphere is behind the viewplane
+    }
+
 	return nil
 }
 
