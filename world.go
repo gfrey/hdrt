@@ -29,8 +29,8 @@ func (wrld *World) Validate() error {
 		return fmt.Errorf("viewplane not set")
 	}
 
-	if wrld.Viewplane.Width == 0 || wrld.Viewplane.Height == 0 {
-		return fmt.Errorf("width or height (%dx%d)", wrld.Viewplane.Width, wrld.Viewplane.Height)
+	if wrld.Viewplane.ResX == 0 || wrld.Viewplane.ResY == 0 {
+		return fmt.Errorf("width or height (%dx%d)", wrld.Viewplane.ResX, wrld.Viewplane.ResY)
 	}
 
 	return nil
@@ -42,8 +42,8 @@ func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, rende
 	pixelInChan := make(chan *pixel)
 	pixelOutChan := make(chan *pixel)
 	go func(pc chan<- *pixel, ac <-chan struct{}) {
-		for y := 0; y < wrld.Viewplane.Height; y++ {
-			for x := 0; x < wrld.Viewplane.Width; x++ {
+		for y := 0; y < wrld.Viewplane.ResX; y++ {
+			for x := 0; x < wrld.Viewplane.ResY; x++ {
 				select {
 				case <-ac:
 					log.Printf("aborting pixel generator")
@@ -82,7 +82,7 @@ func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, rende
 		close(pixelOutChan)
 	}()
 
-	img := image.NewRGBA(image.Rect(0, 0, wrld.Viewplane.Width, wrld.Viewplane.Height))
+	img := image.NewRGBA(image.Rect(0, 0, wrld.Viewplane.ResX, wrld.Viewplane.ResY))
 	ticker := time.NewTicker(1 * time.Second)
 RENDER_LOOP:
 	for {
