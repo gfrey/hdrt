@@ -2,6 +2,7 @@ package hdrt
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 )
 
@@ -11,6 +12,10 @@ func NewVector(x, y, z float64) *Vector {
 	v := new(Vector)
 	v[0], v[1], v[2] = x, y, z
 	return v
+}
+
+func (v *Vector) String() string {
+	return fmt.Sprintf("[%.2f, %.2f, %.2f]", v[0], v[1], v[2])
 }
 
 func (v *Vector) UnmarshalJSON(data []byte) error {
@@ -73,4 +78,14 @@ func (v *Vector) Normalize() {
 	v[0] /= l
 	v[1] /= l
 	v[2] /= l
+}
+
+var epsilon = 0.0001
+
+func VectorEqual(a, b *Vector, ε float64) bool {
+	return FloatEqual(a[0], b[0], ε) && FloatEqual(a[1], b[1], ε) && FloatEqual(a[2], b[2], ε)
+}
+
+func FloatEqual(a, b, ε float64) bool {
+	return a-ε < b && b < a+ε
 }
