@@ -8,14 +8,16 @@ import (
 )
 
 type Scene struct {
-	Objects []Object `json:"objects"`
-	Lights  []*Light `json:"lights"`
+	AmbientLight float64
+	Objects      []Object `json:"objects"`
+	Lights       []*Light `json:"lights"`
 }
 
 func (sc *Scene) UnmarshalJSON(data []byte) error {
 	rsc := &struct {
-		Objects []*rawObject
-		Lights  []*Light
+		AmbientLight float64
+		Objects      []*rawObject
+		Lights       []*Light
 	}{}
 
 	err := json.Unmarshal(data, &rsc)
@@ -27,6 +29,7 @@ func (sc *Scene) UnmarshalJSON(data []byte) error {
 		sc.Objects = append(sc.Objects, rsc.Objects[i].obj)
 	}
 
+	sc.AmbientLight = rsc.AmbientLight
 	sc.Lights = rsc.Lights
 	return nil
 }
@@ -61,7 +64,7 @@ func (sc *Scene) Render(pos, dir *Vector) *color.RGBA {
 }
 
 func (sc *Scene) ColorWithLights(obj Object, pos *Vector) *color.RGBA {
-	baseLight := 0.2
+	baseLight := sc.AmbientLight
 LIGHTSOURCES:
 	for i := range sc.Lights {
 		dist, delta, dir := sc.Lights[i].InCone(pos)
