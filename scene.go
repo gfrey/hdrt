@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/dynport/dgtk/log"
 	"image/color"
+	"math"
 )
 
 type Scene struct {
@@ -89,28 +90,46 @@ type objSphere struct {
 }
 
 func (o *objSphere) Intersect(p, d *Vector) *Vector {
-	c := o.Position
-	dc := VectorSub(c, p)
-	ddc := VectorDot(d, dc)
+	log.Info(">> Intersect(%s, %s)", p, d)
 
-	if ddc > 0 {
-		log.Debug("ddc > 0 | %.2f", ddc)
+	c := o.Position
+	vpc := VectorSub(c, p)
+	vpcd := VectorDot(d, vpc)
+
+	if vpcd < 0.0 {
+		log.Log("SPHERE", "ddc <= 0 | %.2f", vpcd)
+		// sphere is behind the viewplane
+	} else {
+		log.Info("ddc > 0 | %.2f", vpcd)
 		puv := VectorProject(d, c)
 		pc := VectorAdd(p, puv) // center of the sphere projected onto the ray
-		log.Debug("pc: %s", pc)
+		log.Info("pc: %s", pc)
+		log.Info("pc.DistanceTo(c)=%.2f o.Radius=%.2f", pc.DistanceTo(c), o.Radius)
 
-		log.Debug("pc.DistanceTo(c)=%.2f o.Radius=%.2f", pc.DistanceTo(c), o.Radius)
-		if pc.DistanceTo(c) <= o.Radius {
+		if pc.DistanceTo(c) > o.Radius {
+			// no intersection
+		} else {
 			// pc is intersection in the middle
-			// TODO return o.findFirstIntersectionPoint()
-			return pc
+			return o.findFirstIntersectionPoint(vpc, pc, p, d)
 		}
+	}
+	return nil
+}
+
+func (o *objSphere) findFirstIntersectionPoint(vpc *Vector, pc *Vector, p *Vector, d *Vector) *Vector {
+	pcmcl := VectorSub(pc, o.Position).Length()
+	dist := math.Sqrt(o.Radius*o.Radius - pcmcl*pcmcl)
+
+	var di1 float64
+	if vpc.Length() > o.Radius {
+		// ray origin is outside sphere
+		di1 = VectorSub(pc, p).Length() - dist
 	} else {
-		log.Log("SPHERE", "ddc <= 0 | %.2f", ddc)
-		// sphere is behind the viewplane
+		// ray origin is inside sphere
+		di1 = VectorSub(pc, p).Length() + dist
 	}
 
-	return nil
+	return VectorScalarMultiply(VectorAdd(p, d), di1)
 }
 
 type objBox struct {
