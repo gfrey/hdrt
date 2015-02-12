@@ -58,7 +58,7 @@ func TestSceneDescription(t *testing.T) {
 func TestObjSphereIntersect(t *testing.T) {
 	o := &objSphere{
 		BaseObject: &BaseObject{},
-		Radius:     1.0,
+		Radius:     0.75,
 	}
 
 	rayPos := &Vector{0, 0, 0}
@@ -81,7 +81,7 @@ func TestObjSphereIntersect(t *testing.T) {
 		t.Errorf("did expect to intersect when sphere pos is %s, but did not", o.Position)
 	}
 
-	o.Position = &Vector{5, 0.9, 0}
+	o.Position = &Vector{5, 0.74, 0}
 	if o.Intersect(rayPos, dir) == nil {
 		t.Errorf("did expect to intersect when sphere pos is %s, but did not", o.Position)
 	}

@@ -3,7 +3,6 @@ package hdrt
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dynport/dgtk/log"
 	"image/color"
 	"math"
 )
@@ -101,25 +100,17 @@ type objSphere struct {
 }
 
 func (o *objSphere) Intersect(p, d *Vector) *Vector {
-	log.Info(">> Intersect(%s, %s)", p, d)
-
 	c := o.Position
 	vpc := VectorSub(c, p)
 	vpcd := VectorDot(d, vpc)
 
 	if vpcd < 0.0 {
-		log.Log("SPHERE", "ddc <= 0 | %.2f", vpcd)
 		// sphere is behind the viewplane
 	} else {
-		log.Info("ddc > 0 | %.2f", vpcd)
-		puv := VectorProject(d, c)
+		puv := VectorProject(d, vpc)
 		pc := VectorAdd(p, puv) // center of the sphere projected onto the ray
-		log.Info("pc: %s", pc)
-		log.Info("pc.DistanceTo(c)=%.2f o.Radius=%.2f", pc.DistanceTo(c), o.Radius)
 
-		if pc.DistanceTo(c) > o.Radius {
-			// no intersection
-		} else {
+		if pc.DistanceTo(c) <= o.Radius {
 			// pc is intersection in the middle
 			return o.findFirstIntersectionPoint(vpc, pc, p, d)
 		}

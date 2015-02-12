@@ -40,10 +40,6 @@ func VectorScalarMultiply(v *Vector, a float64) *Vector {
 	return NewVector(v[0]*a, v[1]*a, v[2]*a)
 }
 
-func VectorMultiply(v1 *Vector, v2 *Vector) *Vector {
-	return NewVector(v1[0]*v2[0], v1[1]*v2[1], v1[2]*v2[2])
-}
-
 func VectorScalarDivide(v *Vector, a float64) *Vector {
 	return NewVector(v[0]/a, v[1]/a, v[2]/a)
 }
@@ -103,12 +99,9 @@ func (v *Vector) Normalize() {
 }
 
 func VectorProject(v *Vector, u *Vector) *Vector {
-	vu := VectorMultiply(v, u)
+	vu := VectorDot(v, u)
 	vl := v.Length()
-
-	puv := VectorMultiply(VectorScalarDivide(vu, vl), v)
-
-	return puv
+	return VectorScalarMultiply(v, vu/vl)
 }
 
 func (v *Vector) Length() float64 {
