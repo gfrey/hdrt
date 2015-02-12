@@ -83,7 +83,7 @@ func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, rende
 	}()
 
 	img := image.NewRGBA(image.Rect(0, 0, wrld.Viewplane.Width, wrld.Viewplane.Height))
-	ticker := time.NewTicker(2 * time.Second)
+	ticker := time.NewTicker(1 * time.Second)
 RENDER_LOOP:
 	for {
 		select {
@@ -132,7 +132,7 @@ func imgSave(renderDir string, img *image.RGBA) (string, error) {
 }
 
 func (wrld *World) renderPixel(pxl *pixel) {
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(5 * time.Millisecond)
 	pxl.col = &color.RGBA{200, 0, 0, 255}
 }
 
