@@ -122,9 +122,28 @@ func (v *Vector) DistanceTo(v2 *Vector) float64 {
 var epsilon = 0.0001
 
 func VectorEqual(a, b *Vector, ε float64) bool {
-	return FloatEqual(a[0], b[0], ε) && FloatEqual(a[1], b[1], ε) && FloatEqual(a[2], b[2], ε)
+	switch {
+	case a == nil && b == nil:
+		return true
+	case a == nil, b == nil:
+		return false
+	default:
+		return FloatEqual(a[0], b[0], ε) && FloatEqual(a[1], b[1], ε) && FloatEqual(a[2], b[2], ε)
+	}
 }
 
 func FloatEqual(a, b, ε float64) bool {
 	return a-ε < b && b < a+ε
+}
+
+func FloatLessThan(a, b, ε float64) bool {
+	return a < b+ε
+}
+
+func FloatLessThanEqual(a, b, ε float64) bool {
+	return a <= b+ε
+}
+
+func FloatGreaterThan(a, b, ε float64) bool {
+	return a > b-ε
 }
