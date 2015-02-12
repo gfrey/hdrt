@@ -54,3 +54,36 @@ func TestSceneDescription(t *testing.T) {
 		}
 	}
 }
+
+func TestObjSphereIntersect(t *testing.T) {
+    o := &objSphere{
+        BaseObject: &BaseObject{},
+        Radius: 1.0,
+    }
+
+
+    rayPos := &Vector{0,0,0}
+    dir := &Vector{1,0,0}
+
+    _, _ = rayPos, dir
+
+    o.Position = &Vector{0,0,0}
+    if o.Intersect(rayPos, dir) == nil {
+        t.Errorf("did expect to intersect when sphere pos is %s, but did not", o.Position)
+    }
+
+    o.Position = &Vector{5,0,0}
+    if o.Intersect(rayPos, dir) == nil {
+        t.Errorf("did expect to intersect when sphere pos is %s, but did not", o.Position)
+    }
+
+    o.Position = &Vector{5,0.9,0}
+    if o.Intersect(rayPos, dir) == nil {
+        t.Errorf("did expect to intersect when sphere pos is %s, but did not", o.Position)
+    }
+
+    o.Position = &Vector{5,1,0}
+    if o.Intersect(rayPos, dir) != nil {
+        t.Errorf("did expect to NOT intersect when sphere pos is %s, but DID", o.Position)
+    }
+}

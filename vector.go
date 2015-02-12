@@ -56,6 +56,16 @@ func (v *Vector) Add(other *Vector) {
 	v[2] += other[2]
 }
 
+func VectorSub(a, b *Vector) *Vector {
+    return NewVector(a[0]-b[0], a[1]-b[1], a[2]-b[2])
+}
+
+func (v *Vector) Sub(other *Vector) {
+    v[0] -= other[0]
+    v[1] -= other[1]
+    v[2] -= other[2]
+}
+
 func VectorCross(a, b *Vector) *Vector {
 	v := new(Vector)
 
@@ -64,6 +74,10 @@ func VectorCross(a, b *Vector) *Vector {
 	v[2] = a[0]*b[1] - a[1]*b[0]
 
 	return v
+}
+
+func VectorDot(a, b *Vector) float64 {
+    return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
 }
 
 func VectorNormalize(a *Vector) *Vector {

@@ -87,7 +87,9 @@ type objSphere struct {
 	Radius float64
 }
 
-func (o *objSphere) Intersect(pos, dir *Vector) *Vector {
+func (o *objSphere) Intersect(p, d *Vector) *Vector {
+    c := o.Position
+    v := VectorSub(p, c)
 	return nil
 }
 

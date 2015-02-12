@@ -179,5 +179,7 @@ func (wrld *World) renderPixel(pxl *pixel) {
 
 func (wrld *World) posAndDirForPixel(x, y int) (*Vector, *Vector) {
 	positionPixel := wrld.Viewplane.PixelPosition(x, y)
-	return positionPixel, VectorAdd(positionPixel, VectorScalarMultiply(wrld.Camera.Position, -1.0))
+    dir := VectorAdd(positionPixel, VectorScalarMultiply(wrld.Camera.Position, -1.0))
+    dir.Normalize()
+	return positionPixel, dir
 }
