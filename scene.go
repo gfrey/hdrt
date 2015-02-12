@@ -40,22 +40,63 @@ func (sc *Scene) Render(pos, dir *Vector) *color.RGBA {
 	var (
 		cand     Object
 		distance float64
+		ipos     *Vector
 	)
 	for i := range sc.Objects {
 		o := sc.Objects[i]
-		ipos := o.Intersect(pos, dir)
-		if ipos != nil {
-			d := (ipos[0] - pos[0]) / dir[0]
+		p := o.Intersect(pos, dir)
+		if p != nil {
+			d := (p[0] - pos[0]) / dir[0]
 			if cand == nil || d < distance {
+				ipos = p
 				cand = sc.Objects[i]
 				distance = d
 			}
 		}
 	}
 	if cand != nil {
-		return cand.GetColor()
+		return sc.ColorWithLights(cand, ipos)
 	}
-	return &color.RGBA{255, 0, 0, 255}
+	return &color.RGBA{0, 0, 0, 0}
+}
+
+func (sc *Scene) ColorWithLights(obj Object, pos *Vector) *color.RGBA {
+	baseLight := 0.2
+LIGHTSOURCES:
+	for i := range sc.Lights {
+		dist, delta, dir := sc.Lights[i].InCone(pos)
+		if dir != nil {
+			lPos := sc.Lights[i].Position
+			for j := range sc.Objects {
+				if sc.Objects[j] == obj {
+					continue
+				}
+
+				tmpPos := sc.Objects[j].Intersect(lPos, dir)
+				if tmpPos == nil {
+					continue
+				}
+				d := (tmpPos[0] - lPos[0]) / dir[0]
+				if d < dist { // in shadow
+					continue LIGHTSOURCES
+				}
+			}
+			// not in shadow
+			maxAngle := deg2rad(sc.Lights[i].Angle) / 2.0
+			baseLight += (1.0 - (dist / sc.Lights[i].Distance)) * (maxAngle - delta) / maxAngle
+		}
+	}
+
+	if baseLight > 1.0 {
+		baseLight = 1.0
+	}
+
+	c := obj.GetColor()
+	return &color.RGBA{
+		uint8(float64(c.R) * baseLight),
+		uint8(float64(c.G) * baseLight),
+		uint8(float64(c.B) * baseLight),
+		c.A}
 }
 
 type rawObject struct {
@@ -264,5 +305,3 @@ func intersectPlane(l0, l, p0, n *Vector) *Vector {
 		return VectorAdd(l0, VectorScalarMultiply(l, divident/divisor))
 	}
 }
-
-type Light interface{}
