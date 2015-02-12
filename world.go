@@ -19,9 +19,9 @@ type World struct {
 }
 
 type pixel struct {
-	x, y int
-	col  *color.RGBA
-	dir  *Vector
+	x, y     int
+	col      *color.RGBA
+	pos, dir *Vector
 }
 
 func (wrld *World) Init() error {
@@ -50,6 +50,30 @@ func (wrld *World) validate() error {
 		return fmt.Errorf("width or height (%dx%d)", wrld.Viewplane.ResX, wrld.Viewplane.ResY)
 	}
 
+	if wrld.Camera == nil {
+		return fmt.Errorf("camera not set")
+	}
+
+	if wrld.Camera.Position == nil {
+		return fmt.Errorf("camera position not set")
+	}
+
+	if wrld.Camera.Direction == nil {
+		return fmt.Errorf("camera direction not set")
+	}
+
+	if wrld.Camera.Up == nil {
+		return fmt.Errorf("camera up vector not set")
+	}
+
+	if wrld.Scene == nil {
+		return fmt.Errorf("scene not set")
+	}
+
+	if len(wrld.Scene.Objects) == 0 {
+		return fmt.Errorf("no objects in scene")
+	}
+
 	return nil
 }
 
@@ -67,7 +91,8 @@ func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, rende
 					close(pc)
 					return
 				default:
-					pc <- &pixel{x: x, y: y, dir: wrld.dirForPixel(x, y)}
+					pos, dir := wrld.posAndDirForPixel(x, y)
+					pc <- &pixel{x: x, y: y, pos: pos, dir: dir}
 				}
 			}
 		}
@@ -149,11 +174,10 @@ func imgSave(renderDir string, img *image.RGBA) (string, error) {
 }
 
 func (wrld *World) renderPixel(pxl *pixel) {
-	time.Sleep(5 * time.Millisecond)
-	pxl.col = &color.RGBA{200, 0, 0, 255}
+	pxl.col = wrld.Scene.Render(pxl.pos, pxl.dir)
 }
 
-func (wrld *World) dirForPixel(x, y int) *Vector {
+func (wrld *World) posAndDirForPixel(x, y int) (*Vector, *Vector) {
 	positionPixel := wrld.Viewplane.PixelPosition(x, y)
-	return VectorAdd(positionPixel, VectorScalarMultiply(wrld.Camera.Position, -1.0))
+	return positionPixel, VectorAdd(positionPixel, VectorScalarMultiply(wrld.Camera.Position, -1.0))
 }
