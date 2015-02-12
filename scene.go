@@ -149,7 +149,113 @@ type objBox struct {
 }
 
 func (o *objBox) Intersect(pos, dir *Vector) *Vector {
+	w, h, d := o.Width/2.0, o.Height/2.0, o.Depth/2.0
+
+	p0 := NewVector(o.Position[0]+w, o.Position[1]+h, o.Position[2]+d)
+	p1 := NewVector(o.Position[0]-w, o.Position[1]+h, o.Position[2]+d)
+	p2 := NewVector(o.Position[0]+w, o.Position[1]-h, o.Position[2]+d)
+	p3 := NewVector(o.Position[0]-w, o.Position[1]-h, o.Position[2]+d)
+	p4 := NewVector(o.Position[0]+w, o.Position[1]+h, o.Position[2]-d)
+	p5 := NewVector(o.Position[0]-w, o.Position[1]+h, o.Position[2]-d)
+	p6 := NewVector(o.Position[0]+w, o.Position[1]-h, o.Position[2]-d)
+	p7 := NewVector(o.Position[0]-w, o.Position[1]-h, o.Position[2]-d)
+
+	var cand *Vector
+	cand = intersectSquare(pos, dir, p0, p4, p1)
+	if cand != nil {
+		return cand
+	}
+
+	cand = intersectSquare(pos, dir, p0, p1, p2)
+	if cand != nil {
+		return cand
+	}
+
+	cand = intersectSquare(pos, dir, p0, p2, p4)
+	if cand != nil {
+		return cand
+	}
+
+	cand = intersectSquare(pos, dir, p7, p5, p6)
+	if cand != nil {
+		return cand
+	}
+
+	cand = intersectSquare(pos, dir, p7, p6, p3)
+	if cand != nil {
+		return cand
+	}
+
+	cand = intersectSquare(pos, dir, p7, p3, p5)
+	if cand != nil {
+		return cand
+	}
+
 	return nil
+}
+
+func intersectSquare(l0, l, p0, p1, p2 *Vector) *Vector {
+	a := VectorSub(p1, p0)
+	b := VectorSub(p2, p0)
+	normal := VectorCross(a, b)
+	normal.Normalize()
+	cand := intersectPlane(l0, l, p0, normal)
+	if cand != nil && pointInPlane(a, b, VectorSub(cand, p0)) {
+		return cand
+	}
+	return nil
+}
+
+// point w in plane opened by u and v (from origin) (can be reused for triangles with r+t < 1.0)
+func pointInPlane(u, v, w *Vector) bool {
+	vCrossW := VectorCross(v, w)
+	vCrossU := VectorCross(v, u)
+
+	// Test sign of r
+	if VectorDot(vCrossW, vCrossU) < 0.0 {
+		return false
+	}
+
+	uCrossW := VectorCross(u, w)
+	uCrossV := VectorCross(u, v)
+
+	// Test sign of t
+	if VectorDot(uCrossW, uCrossV) < 0.0 {
+		return false
+	}
+
+	// At this point, we know that r and t and both > 0.
+	// Therefore, as long as their sum is <= 1, each must be less <= 1
+	denom := uCrossV.Length()
+	r := vCrossW.Length() / denom
+	t := uCrossW.Length() / denom
+
+	return FloatLessThan(r, 1.0, epsilon) && FloatLessThan(t, 1.0, epsilon)
+}
+
+// l0 point on the ray
+// l  direction of the ray
+// p0 point on the plane
+// n  normal of the plane
+//
+// d := (p0 - l0) * n / l * n
+// if divisor is zero the line is parallel to the plane
+// if divisor and divident are zero line is contained in plane
+func intersectPlane(l0, l, p0, n *Vector) *Vector {
+	divident := VectorDot(VectorSub(p0, l0), n)
+	divisor := VectorDot(l, n)
+
+	switch {
+	case FloatEqual(divisor, 0.0, epsilon):
+		if FloatEqual(divident, 0.0, epsilon) {
+			return l0
+		}
+		return nil
+	case FloatGreaterThan(divisor, 0.0, epsilon):
+		return nil
+	default:
+		return VectorAdd(l0, VectorScalarMultiply(l, divident/divisor))
+	}
 }
 
 type Light interface{}
