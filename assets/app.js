@@ -76,7 +76,13 @@ var app = {
   };
 
   app.resetImage = function () {
-    $("#scene img").attr("src", "http://fillmurray.com/600/300");
+    var w = document.querySelector("#scene img").naturalWidth;
+    var h = document.querySelector("#scene img").naturalHeight;
+    var ratio = h/w;
+    w = 600;
+    h = 600*ratio;
+
+    $("#scene img").attr("src", "http://fillmurray.com/" + w + "/" + h);
   };
 })();
 
