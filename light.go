@@ -9,8 +9,11 @@ type Light struct {
 	Distance  float64
 }
 
-func (l *Light) InCone(pos *Vector) (float64, float64, *Vector) {
+func (l *Light) InCone(pos, normal *Vector) (float64, float64, *Vector) {
 	v := VectorSub(pos, l.Position)
+	if VectorDot(v, normal) > 0 {
+		return 0.0, 0.0, nil
+	}
 	d := v.Length()
 	if d > l.Distance { // outside of light cone
 		return 0.0, 0.0, nil

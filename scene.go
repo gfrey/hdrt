@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
+	"log"
 	"math"
 )
 
@@ -65,9 +66,10 @@ func (sc *Scene) Render(pos, dir *Vector) *color.RGBA {
 
 func (sc *Scene) ColorWithLights(obj Object, pos *Vector) *color.RGBA {
 	baseLight := sc.AmbientLight
+	normal := obj.Normal(pos)
 LIGHTSOURCES:
 	for i := range sc.Lights {
-		dist, delta, dir := sc.Lights[i].InCone(pos)
+		dist, delta, dir := sc.Lights[i].InCone(pos, normal)
 		if dir != nil {
 			lPos := sc.Lights[i].Position
 			for j := range sc.Objects {
@@ -139,6 +141,7 @@ func (robj *rawObject) UnmarshalJSON(data []byte) error {
 
 type Object interface {
 	Intersect(pos *Vector, dir *Vector) (intersection *Vector) // returns nil on no intersection
+	Normal(pos *Vector) *Vector
 	GetColor() *color.RGBA
 }
 
@@ -159,27 +162,33 @@ type objSphere struct {
 	Radius float64
 }
 
+func (o *objSphere) Normal(pos *Vector) *Vector {
+	n := VectorSub(pos, o.Position)
+	d := n.Length()
+	if !FloatEqual(d, o.Radius, epsilon) {
+		log.Printf("radius %.2f should equal  %.2f", o.Radius, d)
+	}
+	n.Normalize()
+	return n
+}
+
 func (o *objSphere) Intersect(p, d *Vector) *Vector {
 	c := o.Position
 	vpc := VectorSub(c, p)
-	vpcd := VectorDot(d, vpc)
 
-	if vpcd < 0.0 {
+	if VectorDot(d, vpc) < 0.0 {
 		// sphere is behind the viewplane
-	} else {
-		puv := VectorProject(d, vpc)
-		pc := VectorAdd(p, puv) // center of the sphere projected onto the ray
-
-		if pc.DistanceTo(c) <= o.Radius {
-			// pc is intersection in the middle
-			return o.findFirstIntersectionPoint(vpc, pc, p, d)
-		}
+		return nil
 	}
-	return nil
-}
 
-func (o *objSphere) findFirstIntersectionPoint(vpc *Vector, pc *Vector, p *Vector, d *Vector) *Vector {
-	pcmcl := VectorSub(pc, o.Position).Length()
+	puv := VectorProject(vpc, d) // vpc on d
+	pc := VectorAdd(p, puv)      // center of the sphere projected onto the ray
+
+	if pc.DistanceTo(c) > o.Radius {
+		return nil
+	}
+
+	pcmcl := VectorSub(pc, c).Length()
 	dist := math.Sqrt(o.Radius*o.Radius - pcmcl*pcmcl)
 
 	var di1 float64
@@ -197,6 +206,26 @@ func (o *objSphere) findFirstIntersectionPoint(vpc *Vector, pc *Vector, p *Vecto
 type objBox struct {
 	*BaseObject
 	Width, Height, Depth float64
+}
+
+func (o *objBox) Normal(pos *Vector) *Vector {
+	w, h, d := o.Width/2.0, o.Height/2.0, o.Depth/2.0
+
+	switch {
+	case FloatEqual(o.Position[0]+w, pos[0], epsilon):
+		return NewVector(1.0, 0.0, 0.0)
+	case FloatEqual(o.Position[0]-w, pos[0], epsilon):
+		return NewVector(-1.0, 0.0, 0.0)
+	case FloatEqual(o.Position[1]+h, pos[1], epsilon):
+		return NewVector(0.0, 1.0, 0.0)
+	case FloatEqual(o.Position[1]-h, pos[1], epsilon):
+		return NewVector(0.0, -1.0, 0.0)
+	case FloatEqual(o.Position[2]+d, pos[2], epsilon):
+		return NewVector(0.0, 0.0, 1.0)
+	case FloatEqual(o.Position[2]-d, pos[2], epsilon):
+		return NewVector(0.0, 0.0, -1.0)
+	}
+	panic("don't know how to compute a normal")
 }
 
 func (o *objBox) Intersect(pos, dir *Vector) *Vector {
