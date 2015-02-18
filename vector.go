@@ -98,7 +98,7 @@ func (v *Vector) Normalize() {
 	v[2] /= l
 }
 
-func VectorProject(v *Vector, u *Vector) *Vector {
+func VectorProject(u *Vector, v *Vector) *Vector {
 	vu := VectorDot(v, u)
 	vl := v.Length()
 	return VectorScalarMultiply(v, vu/vl)

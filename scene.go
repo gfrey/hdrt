@@ -200,7 +200,7 @@ func (o *objSphere) Intersect(p, d *Vector) *Vector {
 		di1 = VectorSub(pc, p).Length() + dist
 	}
 
-	return VectorScalarMultiply(VectorAdd(p, d), di1)
+	return VectorAdd(p, VectorScalarMultiply(d, di1))
 }
 
 type objBox struct {
