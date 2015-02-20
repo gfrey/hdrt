@@ -35,11 +35,6 @@ func (sc *Scene) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type intersection struct {
-	d   float64
-	obj obj.Object
-}
-
 func (sc *Scene) Render(pos, dir *vec.Vector) *color.RGBA {
 	var (
 		cand     obj.Object
