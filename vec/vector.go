@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+
+	"github.com/gfrey/hdrt/mat"
 )
 
 type Vector struct {
@@ -126,33 +128,15 @@ func (v *Vector) DistanceTo(v2 *Vector) float64 {
 	return Sub(v2, v).Length()
 }
 
-var epsilon = 0.0001
-
-func Equal(a, b *Vector, ε float64) bool {
+func Equal(a, b *Vector) bool {
 	switch {
 	case a == nil && b == nil:
 		return true
 	case a == nil, b == nil:
 		return false
 	default:
-		return FloatEqual(a.Data[0], b.Data[0], ε) &&
-			FloatEqual(a.Data[1], b.Data[1], ε) &&
-			FloatEqual(a.Data[2], b.Data[2], ε)
+		return mat.FloatEqual(a.Data[0], b.Data[0]) &&
+			mat.FloatEqual(a.Data[1], b.Data[1]) &&
+			mat.FloatEqual(a.Data[2], b.Data[2])
 	}
-}
-
-func FloatEqual(a, b, ε float64) bool {
-	return a-ε < b && b < a+ε
-}
-
-func FloatLessThan(a, b, ε float64) bool {
-	return a < b+ε
-}
-
-func FloatLessThanEqual(a, b, ε float64) bool {
-	return a <= b+ε
-}
-
-func FloatGreaterThan(a, b, ε float64) bool {
-	return a > b-ε
 }

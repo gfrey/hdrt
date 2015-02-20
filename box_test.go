@@ -16,7 +16,7 @@ func TestBoxIntersection(t *testing.T) {
 
 	i1 := b.Intersect(vec.New(0.0, 0.0, 0.0), vec.New(1.0, 0.0, 0.0))
 	i1Exp := vec.New(1.5, 0.0, 0.0)
-	if i1 == nil || !vec.Equal(i1, i1Exp, epsilon) {
+	if i1 == nil || !vec.Equal(i1, i1Exp) {
 		t.Errorf("expected i1 to be %s, got %s", i1Exp, i1)
 	}
 
@@ -52,7 +52,7 @@ func TestIntersectPlane(t *testing.T) {
 
 	for i := range tt {
 		cand := intersectPlane(r_pos, r_dir, tt[i].p0, tt[i].n)
-		if !vec.Equal(cand, tt[i].exp, epsilon) {
+		if !vec.Equal(cand, tt[i].exp) {
 			t.Errorf("expected test %d to have %s, got %s", i, tt[i].exp, cand)
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 
+	"github.com/gfrey/hdrt/mat"
 	"github.com/gfrey/hdrt/vec"
 )
 
@@ -167,7 +168,7 @@ type objSphere struct {
 func (o *objSphere) Normal(pos *vec.Vector) *vec.Vector {
 	n := vec.Sub(pos, o.Position)
 	d := n.Length()
-	if !vec.FloatEqual(d, o.Radius, epsilon) {
+	if !mat.FloatEqual(d, o.Radius) {
 		log.Printf("radius %.2f should equal  %.2f", o.Radius, d)
 	}
 	n.Normalize()
@@ -214,17 +215,17 @@ func (o *objBox) Normal(pos *vec.Vector) *vec.Vector {
 	w, h, d := o.Width/2.0, o.Height/2.0, o.Depth/2.0
 
 	switch {
-	case vec.FloatEqual(o.Position.Data[0]+w, pos.Data[0], epsilon):
+	case mat.FloatEqual(o.Position.Data[0]+w, pos.Data[0]):
 		return vec.New(1.0, 0.0, 0.0)
-	case vec.FloatEqual(o.Position.Data[0]-w, pos.Data[0], epsilon):
+	case mat.FloatEqual(o.Position.Data[0]-w, pos.Data[0]):
 		return vec.New(-1.0, 0.0, 0.0)
-	case vec.FloatEqual(o.Position.Data[1]+h, pos.Data[1], epsilon):
+	case mat.FloatEqual(o.Position.Data[1]+h, pos.Data[1]):
 		return vec.New(0.0, 1.0, 0.0)
-	case vec.FloatEqual(o.Position.Data[1]-h, pos.Data[1], epsilon):
+	case mat.FloatEqual(o.Position.Data[1]-h, pos.Data[1]):
 		return vec.New(0.0, -1.0, 0.0)
-	case vec.FloatEqual(o.Position.Data[2]+d, pos.Data[2], epsilon):
+	case mat.FloatEqual(o.Position.Data[2]+d, pos.Data[2]):
 		return vec.New(0.0, 0.0, 1.0)
-	case vec.FloatEqual(o.Position.Data[2]-d, pos.Data[2], epsilon):
+	case mat.FloatEqual(o.Position.Data[2]-d, pos.Data[2]):
 		return vec.New(0.0, 0.0, -1.0)
 	}
 	panic("don't know how to compute a normal")
@@ -313,7 +314,7 @@ func pointInPlane(u, v, w *vec.Vector) bool {
 	r := vCrossW.Length() / denom
 	t := uCrossW.Length() / denom
 
-	return vec.FloatLessThan(r, 1.0, epsilon) && vec.FloatLessThan(t, 1.0, epsilon)
+	return mat.FloatLessThan(r, 1.0) && mat.FloatLessThan(t, 1.0)
 }
 
 // l0 point on the ray
@@ -329,12 +330,12 @@ func intersectPlane(l0, l, p0, n *vec.Vector) *vec.Vector {
 	divisor := vec.Dot(l, n)
 
 	switch {
-	case vec.FloatEqual(divisor, 0.0, epsilon):
-		if vec.FloatEqual(divident, 0.0, epsilon) {
+	case mat.FloatEqual(divisor, 0.0):
+		if mat.FloatEqual(divident, 0.0) {
 			return l0
 		}
 		return nil
-	case vec.FloatGreaterThan(divisor, 0.0, epsilon):
+	case mat.FloatGreaterThan(divisor, 0.0):
 		return nil
 	default:
 		return vec.Add(l0, vec.ScalarMultiply(l, divident/divisor))
