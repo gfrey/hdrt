@@ -6,6 +6,8 @@ import (
 	"image/color"
 	"log"
 	"math"
+
+	"github.com/gfrey/hdrt/vec"
 )
 
 type Scene struct {
@@ -40,11 +42,11 @@ type intersection struct {
 	obj Object
 }
 
-func (sc *Scene) Render(pos, dir *Vector) *color.RGBA {
+func (sc *Scene) Render(pos, dir *vec.Vector) *color.RGBA {
 	var (
 		cand     Object
 		distance float64
-		ipos     *Vector
+		ipos     *vec.Vector
 	)
 	for i := range sc.Objects {
 		o := sc.Objects[i]
@@ -64,7 +66,7 @@ func (sc *Scene) Render(pos, dir *Vector) *color.RGBA {
 	return &color.RGBA{0, 0, 0, 0}
 }
 
-func (sc *Scene) ColorWithLights(obj Object, pos *Vector) *color.RGBA {
+func (sc *Scene) ColorWithLights(obj Object, pos *vec.Vector) *color.RGBA {
 	baseLight := sc.AmbientLight
 	normal := obj.Normal(pos)
 LIGHTSOURCES:
@@ -106,7 +108,7 @@ LIGHTSOURCES:
 
 type rawObject struct {
 	Type       string
-	Position   *Vector
+	Position   *vec.Vector
 	Properties json.RawMessage
 	obj        Object
 }
@@ -114,7 +116,7 @@ type rawObject struct {
 func (robj *rawObject) UnmarshalJSON(data []byte) error {
 	tobj := &struct {
 		Type       string
-		Position   *Vector
+		Position   *vec.Vector
 		Color      *color.RGBA
 		Properties json.RawMessage
 	}{}
@@ -140,13 +142,13 @@ func (robj *rawObject) UnmarshalJSON(data []byte) error {
 }
 
 type Object interface {
-	Intersect(pos *Vector, dir *Vector) (intersection *Vector) // returns nil on no intersection
-	Normal(pos *Vector) *Vector
+	Intersect(pos *vec.Vector, dir *vec.Vector) (intersection *vec.Vector) // returns nil on no intersection
+	Normal(pos *vec.Vector) *vec.Vector
 	GetColor() *color.RGBA
 }
 
 type BaseObject struct {
-	Position *Vector
+	Position *vec.Vector
 	Color    *color.RGBA
 }
 
@@ -162,45 +164,45 @@ type objSphere struct {
 	Radius float64
 }
 
-func (o *objSphere) Normal(pos *Vector) *Vector {
-	n := VectorSub(pos, o.Position)
+func (o *objSphere) Normal(pos *vec.Vector) *vec.Vector {
+	n := vec.VectorSub(pos, o.Position)
 	d := n.Length()
-	if !FloatEqual(d, o.Radius, epsilon) {
+	if !vec.FloatEqual(d, o.Radius, epsilon) {
 		log.Printf("radius %.2f should equal  %.2f", o.Radius, d)
 	}
 	n.Normalize()
 	return n
 }
 
-func (o *objSphere) Intersect(p, d *Vector) *Vector {
+func (o *objSphere) Intersect(p, d *vec.Vector) *vec.Vector {
 	c := o.Position
-	vpc := VectorSub(c, p)
+	vpc := vec.VectorSub(c, p)
 
-	if VectorDot(d, vpc) < 0.0 {
+	if vec.VectorDot(d, vpc) < 0.0 {
 		// sphere is behind the viewplane
 		return nil
 	}
 
-	puv := VectorProject(vpc, d) // vpc on d
-	pc := VectorAdd(p, puv)      // center of the sphere projected onto the ray
+	puv := vec.VectorProject(vpc, d) // vpc on d
+	pc := vec.VectorAdd(p, puv)      // center of the sphere projected onto the ray
 
 	if pc.DistanceTo(c) > o.Radius {
 		return nil
 	}
 
-	pcmcl := VectorSub(pc, c).Length()
+	pcmcl := vec.VectorSub(pc, c).Length()
 	dist := math.Sqrt(o.Radius*o.Radius - pcmcl*pcmcl)
 
 	var di1 float64
 	if vpc.Length() > o.Radius {
 		// ray origin is outside sphere
-		di1 = VectorSub(pc, p).Length() - dist
+		di1 = vec.VectorSub(pc, p).Length() - dist
 	} else {
 		// ray origin is inside sphere
-		di1 = VectorSub(pc, p).Length() + dist
+		di1 = vec.VectorSub(pc, p).Length() + dist
 	}
 
-	return VectorAdd(p, VectorScalarMultiply(d, di1))
+	return vec.VectorAdd(p, vec.VectorScalarMultiply(d, di1))
 }
 
 type objBox struct {
@@ -208,40 +210,40 @@ type objBox struct {
 	Width, Height, Depth float64
 }
 
-func (o *objBox) Normal(pos *Vector) *Vector {
+func (o *objBox) Normal(pos *vec.Vector) *vec.Vector {
 	w, h, d := o.Width/2.0, o.Height/2.0, o.Depth/2.0
 
 	switch {
-	case FloatEqual(o.Position.Data[0]+w, pos.Data[0], epsilon):
-		return NewVector(1.0, 0.0, 0.0)
-	case FloatEqual(o.Position.Data[0]-w, pos.Data[0], epsilon):
-		return NewVector(-1.0, 0.0, 0.0)
-	case FloatEqual(o.Position.Data[1]+h, pos.Data[1], epsilon):
-		return NewVector(0.0, 1.0, 0.0)
-	case FloatEqual(o.Position.Data[1]-h, pos.Data[1], epsilon):
-		return NewVector(0.0, -1.0, 0.0)
-	case FloatEqual(o.Position.Data[2]+d, pos.Data[2], epsilon):
-		return NewVector(0.0, 0.0, 1.0)
-	case FloatEqual(o.Position.Data[2]-d, pos.Data[2], epsilon):
-		return NewVector(0.0, 0.0, -1.0)
+	case vec.FloatEqual(o.Position.Data[0]+w, pos.Data[0], epsilon):
+		return vec.NewVector(1.0, 0.0, 0.0)
+	case vec.FloatEqual(o.Position.Data[0]-w, pos.Data[0], epsilon):
+		return vec.NewVector(-1.0, 0.0, 0.0)
+	case vec.FloatEqual(o.Position.Data[1]+h, pos.Data[1], epsilon):
+		return vec.NewVector(0.0, 1.0, 0.0)
+	case vec.FloatEqual(o.Position.Data[1]-h, pos.Data[1], epsilon):
+		return vec.NewVector(0.0, -1.0, 0.0)
+	case vec.FloatEqual(o.Position.Data[2]+d, pos.Data[2], epsilon):
+		return vec.NewVector(0.0, 0.0, 1.0)
+	case vec.FloatEqual(o.Position.Data[2]-d, pos.Data[2], epsilon):
+		return vec.NewVector(0.0, 0.0, -1.0)
 	}
 	panic("don't know how to compute a normal")
 }
 
-func (o *objBox) Intersect(pos, dir *Vector) *Vector {
+func (o *objBox) Intersect(pos, dir *vec.Vector) *vec.Vector {
 	w, h, d := o.Width/2.0, o.Height/2.0, o.Depth/2.0
 	x, y, z := o.Position.Data[0], o.Position.Data[1], o.Position.Data[2]
 
-	p0 := NewVector(x+w, y+h, z+d)
-	p1 := NewVector(x-w, y+h, z+d)
-	p2 := NewVector(x+w, y-h, z+d)
-	p3 := NewVector(x-w, y-h, z+d)
-	p4 := NewVector(x+w, y+h, z-d)
-	p5 := NewVector(x-w, y+h, z-d)
-	p6 := NewVector(x+w, y-h, z-d)
-	p7 := NewVector(x-w, y-h, z-d)
+	p0 := vec.NewVector(x+w, y+h, z+d)
+	p1 := vec.NewVector(x-w, y+h, z+d)
+	p2 := vec.NewVector(x+w, y-h, z+d)
+	p3 := vec.NewVector(x-w, y-h, z+d)
+	p4 := vec.NewVector(x+w, y+h, z-d)
+	p5 := vec.NewVector(x-w, y+h, z-d)
+	p6 := vec.NewVector(x+w, y-h, z-d)
+	p7 := vec.NewVector(x-w, y-h, z-d)
 
-	var cand *Vector
+	var cand *vec.Vector
 	cand = intersectSquare(pos, dir, p0, p4, p1)
 	if cand != nil {
 		return cand
@@ -275,33 +277,33 @@ func (o *objBox) Intersect(pos, dir *Vector) *Vector {
 	return nil
 }
 
-func intersectSquare(l0, l, p0, p1, p2 *Vector) *Vector {
-	a := VectorSub(p1, p0)
-	b := VectorSub(p2, p0)
-	normal := VectorCross(a, b)
+func intersectSquare(l0, l, p0, p1, p2 *vec.Vector) *vec.Vector {
+	a := vec.VectorSub(p1, p0)
+	b := vec.VectorSub(p2, p0)
+	normal := vec.VectorCross(a, b)
 	normal.Normalize()
 	cand := intersectPlane(l0, l, p0, normal)
-	if cand != nil && pointInPlane(a, b, VectorSub(cand, p0)) {
+	if cand != nil && pointInPlane(a, b, vec.VectorSub(cand, p0)) {
 		return cand
 	}
 	return nil
 }
 
 // point w in plane opened by u and v (from origin) (can be reused for triangles with r+t < 1.0)
-func pointInPlane(u, v, w *Vector) bool {
-	vCrossW := VectorCross(v, w)
-	vCrossU := VectorCross(v, u)
+func pointInPlane(u, v, w *vec.Vector) bool {
+	vCrossW := vec.VectorCross(v, w)
+	vCrossU := vec.VectorCross(v, u)
 
 	// Test sign of r
-	if VectorDot(vCrossW, vCrossU) < 0.0 {
+	if vec.VectorDot(vCrossW, vCrossU) < 0.0 {
 		return false
 	}
 
-	uCrossW := VectorCross(u, w)
-	uCrossV := VectorCross(u, v)
+	uCrossW := vec.VectorCross(u, w)
+	uCrossV := vec.VectorCross(u, v)
 
 	// Test sign of t
-	if VectorDot(uCrossW, uCrossV) < 0.0 {
+	if vec.VectorDot(uCrossW, uCrossV) < 0.0 {
 		return false
 	}
 
@@ -311,7 +313,7 @@ func pointInPlane(u, v, w *Vector) bool {
 	r := vCrossW.Length() / denom
 	t := uCrossW.Length() / denom
 
-	return FloatLessThan(r, 1.0, epsilon) && FloatLessThan(t, 1.0, epsilon)
+	return vec.FloatLessThan(r, 1.0, epsilon) && vec.FloatLessThan(t, 1.0, epsilon)
 }
 
 // l0 point on the ray
@@ -322,19 +324,19 @@ func pointInPlane(u, v, w *Vector) bool {
 // d := (p0 - l0) * n / l * n
 // if divisor is zero the line is parallel to the plane
 // if divisor and divident are zero line is contained in plane
-func intersectPlane(l0, l, p0, n *Vector) *Vector {
-	divident := VectorDot(VectorSub(p0, l0), n)
-	divisor := VectorDot(l, n)
+func intersectPlane(l0, l, p0, n *vec.Vector) *vec.Vector {
+	divident := vec.VectorDot(vec.VectorSub(p0, l0), n)
+	divisor := vec.VectorDot(l, n)
 
 	switch {
-	case FloatEqual(divisor, 0.0, epsilon):
-		if FloatEqual(divident, 0.0, epsilon) {
+	case vec.FloatEqual(divisor, 0.0, epsilon):
+		if vec.FloatEqual(divident, 0.0, epsilon) {
 			return l0
 		}
 		return nil
-	case FloatGreaterThan(divisor, 0.0, epsilon):
+	case vec.FloatGreaterThan(divisor, 0.0, epsilon):
 		return nil
 	default:
-		return VectorAdd(l0, VectorScalarMultiply(l, divident/divisor))
+		return vec.VectorAdd(l0, vec.VectorScalarMultiply(l, divident/divisor))
 	}
 }

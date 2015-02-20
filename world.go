@@ -10,6 +10,8 @@ import (
 	"path"
 	"sync"
 	"time"
+
+	"github.com/gfrey/hdrt/vec"
 )
 
 type World struct {
@@ -21,7 +23,7 @@ type World struct {
 type pixel struct {
 	x, y     int
 	col      *color.RGBA
-	pos, dir *Vector
+	pos, dir *vec.Vector
 }
 
 func (wrld *World) Init() error {
@@ -177,9 +179,9 @@ func (wrld *World) renderPixel(pxl *pixel) {
 	pxl.col = wrld.Scene.Render(pxl.pos, pxl.dir)
 }
 
-func (wrld *World) posAndDirForPixel(x, y int) (*Vector, *Vector) {
+func (wrld *World) posAndDirForPixel(x, y int) (*vec.Vector, *vec.Vector) {
 	positionPixel := wrld.Viewplane.PixelPosition(x, y)
-	dir := VectorAdd(positionPixel, VectorScalarMultiply(wrld.Camera.Position, -1.0))
+	dir := vec.VectorAdd(positionPixel, vec.VectorScalarMultiply(wrld.Camera.Position, -1.0))
 	dir.Normalize()
 	return positionPixel, dir
 }

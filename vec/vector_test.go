@@ -1,4 +1,4 @@
-package hdrt
+package vec
 
 import "testing"
 

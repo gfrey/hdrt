@@ -1,17 +1,21 @@
 package hdrt
 
-import "math"
+import (
+	"math"
+
+	"github.com/gfrey/hdrt/vec"
+)
 
 type Light struct {
-	Position  *Vector
-	Direction *Vector
+	Position  *vec.Vector
+	Direction *vec.Vector
 	Angle     float64
 	Distance  float64
 }
 
-func (l *Light) InCone(pos, normal *Vector) (float64, float64, *Vector) {
-	v := VectorSub(pos, l.Position)
-	if VectorDot(v, normal) > 0 {
+func (l *Light) InCone(pos, normal *vec.Vector) (float64, float64, *vec.Vector) {
+	v := vec.VectorSub(pos, l.Position)
+	if vec.VectorDot(v, normal) > 0 {
 		return 0.0, 0.0, nil
 	}
 	d := v.Length()
@@ -19,7 +23,7 @@ func (l *Light) InCone(pos, normal *Vector) (float64, float64, *Vector) {
 		return 0.0, 0.0, nil
 	}
 
-	cosDelta := VectorDot(v, l.Direction) / (d * l.Direction.Length())
+	cosDelta := vec.VectorDot(v, l.Direction) / (d * l.Direction.Length())
 	delta := math.Acos(cosDelta)
 	if delta > (deg2rad(l.Angle) / 2.0) {
 		return 0.0, 0.0, nil
