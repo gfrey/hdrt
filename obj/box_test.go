@@ -1,4 +1,4 @@
-package hdrt
+package obj
 
 import (
 	"testing"
