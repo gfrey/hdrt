@@ -3,9 +3,9 @@ package vec
 import "testing"
 
 func TestVectorScalarMultiply(t *testing.T) {
-	v := NewVector(1.0, 2.0, 0.0)
+	v := New(1.0, 2.0, 0.0)
 
-	vP := VectorScalarMultiply(v, 2.0)
+	vP := ScalarMultiply(v, 2.0)
 	if vP.Data[0] != 2.0 {
 		t.Errorf("expected %.2f, got %.2f", 2.0, vP.Data[0])
 	}
@@ -29,10 +29,10 @@ func TestVectorScalarMultiply(t *testing.T) {
 }
 
 func TestVectorAdd(t *testing.T) {
-	a := NewVector(1.0, 2.0, 3.0)
-	b := NewVector(3.0, 4.0, -5.0)
+	a := New(1.0, 2.0, 3.0)
+	b := New(3.0, 4.0, -5.0)
 
-	c := VectorAdd(a, b)
+	c := Add(a, b)
 	if c.Data[0] != 4.0 {
 		t.Errorf("expected %.2f, got %.2f", 4.0, c.Data[0])
 	}
@@ -56,10 +56,10 @@ func TestVectorAdd(t *testing.T) {
 }
 
 func TestVectorCross(t *testing.T) {
-	a := NewVector(1.0, 0.0, 0.0)
-	b := NewVector(0.0, 1.0, 0.0)
+	a := New(1.0, 0.0, 0.0)
+	b := New(0.0, 1.0, 0.0)
 
-	c := VectorCross(a, b)
+	c := Cross(a, b)
 	if c.Data[0] != 0.0 {
 		t.Errorf("expected %.2f, got %.2f", 0.0, c.Data[0])
 	}
@@ -71,10 +71,10 @@ func TestVectorCross(t *testing.T) {
 	}
 }
 
-func TestVectorNormalize(t *testing.T) {
-	a := NewVector(5.0, 0.0, 0.0)
+func TestNormalize(t *testing.T) {
+	a := New(5.0, 0.0, 0.0)
 
-	b := VectorNormalize(a)
+	b := Normalize(a)
 	if b.Data[0] != 1.0 {
 		t.Errorf("expected %.2f, got %.2f", 1.0, b.Data[0])
 	}

@@ -32,7 +32,7 @@ func (v *Viewplane) Init(c *Camera) error {
 }
 
 func (v *Viewplane) span(c *Camera) {
-	vpCenter := vec.VectorAdd(c.Position, vec.VectorScalarMultiply(c.Direction, v.Distance))
+	vpCenter := vec.Add(c.Position, vec.ScalarMultiply(c.Direction, v.Distance))
 
 	aspectRatio := float64(v.ResX) / float64(v.ResY)
 	alpha := deg2rad(c.FOV)
@@ -42,13 +42,13 @@ func (v *Viewplane) span(c *Camera) {
 	b := v.Distance * math.Tan(beta/2.0)
 
 	vpTop := c.Up
-	vpSide := vec.VectorCross(c.Direction, c.Up)
+	vpSide := vec.Cross(c.Direction, c.Up)
 
-	v.a = vec.VectorScalarMultiply(vpSide, a)
-	v.b = vec.VectorScalarMultiply(vpTop, -b)
-	v.pos = vec.VectorAdd(vec.VectorAdd(vpCenter, vec.VectorScalarMultiply(v.a, -0.5)), vec.VectorScalarMultiply(v.b, -0.5))
+	v.a = vec.ScalarMultiply(vpSide, a)
+	v.b = vec.ScalarMultiply(vpTop, -b)
+	v.pos = vec.Add(vec.Add(vpCenter, vec.ScalarMultiply(v.a, -0.5)), vec.ScalarMultiply(v.b, -0.5))
 }
 
 func (v *Viewplane) PixelPosition(x, y int) *vec.Vector {
-	return vec.VectorAdd(vec.VectorAdd(v.pos, vec.VectorScalarMultiply(v.a, float64(x)/float64(v.ResX))), vec.VectorScalarMultiply(v.b, float64(y)/float64(v.ResY)))
+	return vec.Add(vec.Add(v.pos, vec.ScalarMultiply(v.a, float64(x)/float64(v.ResX))), vec.ScalarMultiply(v.b, float64(y)/float64(v.ResY)))
 }

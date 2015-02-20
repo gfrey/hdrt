@@ -165,7 +165,7 @@ type objSphere struct {
 }
 
 func (o *objSphere) Normal(pos *vec.Vector) *vec.Vector {
-	n := vec.VectorSub(pos, o.Position)
+	n := vec.Sub(pos, o.Position)
 	d := n.Length()
 	if !vec.FloatEqual(d, o.Radius, epsilon) {
 		log.Printf("radius %.2f should equal  %.2f", o.Radius, d)
@@ -176,33 +176,33 @@ func (o *objSphere) Normal(pos *vec.Vector) *vec.Vector {
 
 func (o *objSphere) Intersect(p, d *vec.Vector) *vec.Vector {
 	c := o.Position
-	vpc := vec.VectorSub(c, p)
+	vpc := vec.Sub(c, p)
 
-	if vec.VectorDot(d, vpc) < 0.0 {
+	if vec.Dot(d, vpc) < 0.0 {
 		// sphere is behind the viewplane
 		return nil
 	}
 
-	puv := vec.VectorProject(vpc, d) // vpc on d
-	pc := vec.VectorAdd(p, puv)      // center of the sphere projected onto the ray
+	puv := vec.Project(vpc, d) // vpc on d
+	pc := vec.Add(p, puv)      // center of the sphere projected onto the ray
 
 	if pc.DistanceTo(c) > o.Radius {
 		return nil
 	}
 
-	pcmcl := vec.VectorSub(pc, c).Length()
+	pcmcl := vec.Sub(pc, c).Length()
 	dist := math.Sqrt(o.Radius*o.Radius - pcmcl*pcmcl)
 
 	var di1 float64
 	if vpc.Length() > o.Radius {
 		// ray origin is outside sphere
-		di1 = vec.VectorSub(pc, p).Length() - dist
+		di1 = vec.Sub(pc, p).Length() - dist
 	} else {
 		// ray origin is inside sphere
-		di1 = vec.VectorSub(pc, p).Length() + dist
+		di1 = vec.Sub(pc, p).Length() + dist
 	}
 
-	return vec.VectorAdd(p, vec.VectorScalarMultiply(d, di1))
+	return vec.Add(p, vec.ScalarMultiply(d, di1))
 }
 
 type objBox struct {
@@ -215,17 +215,17 @@ func (o *objBox) Normal(pos *vec.Vector) *vec.Vector {
 
 	switch {
 	case vec.FloatEqual(o.Position.Data[0]+w, pos.Data[0], epsilon):
-		return vec.NewVector(1.0, 0.0, 0.0)
+		return vec.New(1.0, 0.0, 0.0)
 	case vec.FloatEqual(o.Position.Data[0]-w, pos.Data[0], epsilon):
-		return vec.NewVector(-1.0, 0.0, 0.0)
+		return vec.New(-1.0, 0.0, 0.0)
 	case vec.FloatEqual(o.Position.Data[1]+h, pos.Data[1], epsilon):
-		return vec.NewVector(0.0, 1.0, 0.0)
+		return vec.New(0.0, 1.0, 0.0)
 	case vec.FloatEqual(o.Position.Data[1]-h, pos.Data[1], epsilon):
-		return vec.NewVector(0.0, -1.0, 0.0)
+		return vec.New(0.0, -1.0, 0.0)
 	case vec.FloatEqual(o.Position.Data[2]+d, pos.Data[2], epsilon):
-		return vec.NewVector(0.0, 0.0, 1.0)
+		return vec.New(0.0, 0.0, 1.0)
 	case vec.FloatEqual(o.Position.Data[2]-d, pos.Data[2], epsilon):
-		return vec.NewVector(0.0, 0.0, -1.0)
+		return vec.New(0.0, 0.0, -1.0)
 	}
 	panic("don't know how to compute a normal")
 }
@@ -234,14 +234,14 @@ func (o *objBox) Intersect(pos, dir *vec.Vector) *vec.Vector {
 	w, h, d := o.Width/2.0, o.Height/2.0, o.Depth/2.0
 	x, y, z := o.Position.Data[0], o.Position.Data[1], o.Position.Data[2]
 
-	p0 := vec.NewVector(x+w, y+h, z+d)
-	p1 := vec.NewVector(x-w, y+h, z+d)
-	p2 := vec.NewVector(x+w, y-h, z+d)
-	p3 := vec.NewVector(x-w, y-h, z+d)
-	p4 := vec.NewVector(x+w, y+h, z-d)
-	p5 := vec.NewVector(x-w, y+h, z-d)
-	p6 := vec.NewVector(x+w, y-h, z-d)
-	p7 := vec.NewVector(x-w, y-h, z-d)
+	p0 := vec.New(x+w, y+h, z+d)
+	p1 := vec.New(x-w, y+h, z+d)
+	p2 := vec.New(x+w, y-h, z+d)
+	p3 := vec.New(x-w, y-h, z+d)
+	p4 := vec.New(x+w, y+h, z-d)
+	p5 := vec.New(x-w, y+h, z-d)
+	p6 := vec.New(x+w, y-h, z-d)
+	p7 := vec.New(x-w, y-h, z-d)
 
 	var cand *vec.Vector
 	cand = intersectSquare(pos, dir, p0, p4, p1)
@@ -278,12 +278,12 @@ func (o *objBox) Intersect(pos, dir *vec.Vector) *vec.Vector {
 }
 
 func intersectSquare(l0, l, p0, p1, p2 *vec.Vector) *vec.Vector {
-	a := vec.VectorSub(p1, p0)
-	b := vec.VectorSub(p2, p0)
-	normal := vec.VectorCross(a, b)
+	a := vec.Sub(p1, p0)
+	b := vec.Sub(p2, p0)
+	normal := vec.Cross(a, b)
 	normal.Normalize()
 	cand := intersectPlane(l0, l, p0, normal)
-	if cand != nil && pointInPlane(a, b, vec.VectorSub(cand, p0)) {
+	if cand != nil && pointInPlane(a, b, vec.Sub(cand, p0)) {
 		return cand
 	}
 	return nil
@@ -291,19 +291,19 @@ func intersectSquare(l0, l, p0, p1, p2 *vec.Vector) *vec.Vector {
 
 // point w in plane opened by u and v (from origin) (can be reused for triangles with r+t < 1.0)
 func pointInPlane(u, v, w *vec.Vector) bool {
-	vCrossW := vec.VectorCross(v, w)
-	vCrossU := vec.VectorCross(v, u)
+	vCrossW := vec.Cross(v, w)
+	vCrossU := vec.Cross(v, u)
 
 	// Test sign of r
-	if vec.VectorDot(vCrossW, vCrossU) < 0.0 {
+	if vec.Dot(vCrossW, vCrossU) < 0.0 {
 		return false
 	}
 
-	uCrossW := vec.VectorCross(u, w)
-	uCrossV := vec.VectorCross(u, v)
+	uCrossW := vec.Cross(u, w)
+	uCrossV := vec.Cross(u, v)
 
 	// Test sign of t
-	if vec.VectorDot(uCrossW, uCrossV) < 0.0 {
+	if vec.Dot(uCrossW, uCrossV) < 0.0 {
 		return false
 	}
 
@@ -325,8 +325,8 @@ func pointInPlane(u, v, w *vec.Vector) bool {
 // if divisor is zero the line is parallel to the plane
 // if divisor and divident are zero line is contained in plane
 func intersectPlane(l0, l, p0, n *vec.Vector) *vec.Vector {
-	divident := vec.VectorDot(vec.VectorSub(p0, l0), n)
-	divisor := vec.VectorDot(l, n)
+	divident := vec.Dot(vec.Sub(p0, l0), n)
+	divisor := vec.Dot(l, n)
 
 	switch {
 	case vec.FloatEqual(divisor, 0.0, epsilon):
@@ -337,6 +337,6 @@ func intersectPlane(l0, l, p0, n *vec.Vector) *vec.Vector {
 	case vec.FloatGreaterThan(divisor, 0.0, epsilon):
 		return nil
 	default:
-		return vec.VectorAdd(l0, vec.VectorScalarMultiply(l, divident/divisor))
+		return vec.Add(l0, vec.ScalarMultiply(l, divident/divisor))
 	}
 }

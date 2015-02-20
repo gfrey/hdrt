@@ -11,7 +11,7 @@ type Vector struct {
 	length *float64
 }
 
-func NewVector(x, y, z float64) *Vector {
+func New(x, y, z float64) *Vector {
 	v := new(Vector)
 	v.Data[0], v.Data[1], v.Data[2] = x, y, z
 	return v
@@ -39,12 +39,12 @@ func (v *Vector) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func VectorScalarMultiply(v *Vector, a float64) *Vector {
-	return NewVector(v.Data[0]*a, v.Data[1]*a, v.Data[2]*a)
+func ScalarMultiply(v *Vector, a float64) *Vector {
+	return New(v.Data[0]*a, v.Data[1]*a, v.Data[2]*a)
 }
 
-func VectorScalarDivide(v *Vector, a float64) *Vector {
-	return NewVector(v.Data[0]/a, v.Data[1]/a, v.Data[2]/a)
+func ScalarDivide(v *Vector, a float64) *Vector {
+	return New(v.Data[0]/a, v.Data[1]/a, v.Data[2]/a)
 }
 
 func (v *Vector) ScalarMultiply(a float64) {
@@ -56,8 +56,8 @@ func (v *Vector) ScalarMultiply(a float64) {
 	}
 }
 
-func VectorAdd(a, b *Vector) *Vector {
-	return NewVector(a.Data[0]+b.Data[0], a.Data[1]+b.Data[1], a.Data[2]+b.Data[2])
+func Add(a, b *Vector) *Vector {
+	return New(a.Data[0]+b.Data[0], a.Data[1]+b.Data[1], a.Data[2]+b.Data[2])
 }
 
 func (v *Vector) Add(other *Vector) {
@@ -67,8 +67,8 @@ func (v *Vector) Add(other *Vector) {
 	v.Data[2] += other.Data[2]
 }
 
-func VectorSub(a, b *Vector) *Vector {
-	return NewVector(a.Data[0]-b.Data[0], a.Data[1]-b.Data[1], a.Data[2]-b.Data[2])
+func Sub(a, b *Vector) *Vector {
+	return New(a.Data[0]-b.Data[0], a.Data[1]-b.Data[1], a.Data[2]-b.Data[2])
 }
 
 func (v *Vector) Sub(other *Vector) {
@@ -78,7 +78,7 @@ func (v *Vector) Sub(other *Vector) {
 	v.Data[2] -= other.Data[2]
 }
 
-func VectorCross(a, b *Vector) *Vector {
+func Cross(a, b *Vector) *Vector {
 	v := new(Vector)
 
 	v.Data[0] = a.Data[1]*b.Data[2] - a.Data[2]*b.Data[1]
@@ -88,11 +88,11 @@ func VectorCross(a, b *Vector) *Vector {
 	return v
 }
 
-func VectorDot(a, b *Vector) float64 {
+func Dot(a, b *Vector) float64 {
 	return a.Data[0]*b.Data[0] + a.Data[1]*b.Data[1] + a.Data[2]*b.Data[2]
 }
 
-func VectorNormalize(a *Vector) *Vector {
+func Normalize(a *Vector) *Vector {
 	b := new(Vector)
 	b.Data[0], b.Data[1], b.Data[2] = a.Data[0], a.Data[1], a.Data[2]
 	b.Normalize()
@@ -108,10 +108,10 @@ func (v *Vector) Normalize() {
 	*v.length = 1.0
 }
 
-func VectorProject(u *Vector, v *Vector) *Vector {
-	vu := VectorDot(v, u)
+func Project(u *Vector, v *Vector) *Vector {
+	vu := Dot(v, u)
 	vl := v.Length()
-	return VectorScalarMultiply(v, vu/vl)
+	return ScalarMultiply(v, vu/vl)
 }
 
 func (v *Vector) Length() float64 {
@@ -123,12 +123,12 @@ func (v *Vector) Length() float64 {
 }
 
 func (v *Vector) DistanceTo(v2 *Vector) float64 {
-	return VectorSub(v2, v).Length()
+	return Sub(v2, v).Length()
 }
 
 var epsilon = 0.0001
 
-func VectorEqual(a, b *Vector, ε float64) bool {
+func Equal(a, b *Vector, ε float64) bool {
 	switch {
 	case a == nil && b == nil:
 		return true

@@ -14,8 +14,8 @@ type Light struct {
 }
 
 func (l *Light) InCone(pos, normal *vec.Vector) (float64, float64, *vec.Vector) {
-	v := vec.VectorSub(pos, l.Position)
-	if vec.VectorDot(v, normal) > 0 {
+	v := vec.Sub(pos, l.Position)
+	if vec.Dot(v, normal) > 0 {
 		return 0.0, 0.0, nil
 	}
 	d := v.Length()
@@ -23,7 +23,7 @@ func (l *Light) InCone(pos, normal *vec.Vector) (float64, float64, *vec.Vector) 
 		return 0.0, 0.0, nil
 	}
 
-	cosDelta := vec.VectorDot(v, l.Direction) / (d * l.Direction.Length())
+	cosDelta := vec.Dot(v, l.Direction) / (d * l.Direction.Length())
 	delta := math.Acos(cosDelta)
 	if delta > (deg2rad(l.Angle) / 2.0) {
 		return 0.0, 0.0, nil
