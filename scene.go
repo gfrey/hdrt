@@ -50,7 +50,7 @@ func (sc *Scene) Render(pos, dir *Vector) *color.RGBA {
 		o := sc.Objects[i]
 		p := o.Intersect(pos, dir)
 		if p != nil {
-			d := (p[0] - pos[0]) / dir[0]
+			d := (p.Data[0] - pos.Data[0]) / dir.Data[0]
 			if cand == nil || d < distance {
 				ipos = p
 				cand = sc.Objects[i]
@@ -81,7 +81,7 @@ LIGHTSOURCES:
 				if tmpPos == nil {
 					continue
 				}
-				d := (tmpPos[0] - lPos[0]) / dir[0]
+				d := (tmpPos.Data[0] - lPos.Data[0]) / dir.Data[0]
 				if d < dist { // in shadow
 					continue LIGHTSOURCES
 				}
@@ -212,17 +212,17 @@ func (o *objBox) Normal(pos *Vector) *Vector {
 	w, h, d := o.Width/2.0, o.Height/2.0, o.Depth/2.0
 
 	switch {
-	case FloatEqual(o.Position[0]+w, pos[0], epsilon):
+	case FloatEqual(o.Position.Data[0]+w, pos.Data[0], epsilon):
 		return NewVector(1.0, 0.0, 0.0)
-	case FloatEqual(o.Position[0]-w, pos[0], epsilon):
+	case FloatEqual(o.Position.Data[0]-w, pos.Data[0], epsilon):
 		return NewVector(-1.0, 0.0, 0.0)
-	case FloatEqual(o.Position[1]+h, pos[1], epsilon):
+	case FloatEqual(o.Position.Data[1]+h, pos.Data[1], epsilon):
 		return NewVector(0.0, 1.0, 0.0)
-	case FloatEqual(o.Position[1]-h, pos[1], epsilon):
+	case FloatEqual(o.Position.Data[1]-h, pos.Data[1], epsilon):
 		return NewVector(0.0, -1.0, 0.0)
-	case FloatEqual(o.Position[2]+d, pos[2], epsilon):
+	case FloatEqual(o.Position.Data[2]+d, pos.Data[2], epsilon):
 		return NewVector(0.0, 0.0, 1.0)
-	case FloatEqual(o.Position[2]-d, pos[2], epsilon):
+	case FloatEqual(o.Position.Data[2]-d, pos.Data[2], epsilon):
 		return NewVector(0.0, 0.0, -1.0)
 	}
 	panic("don't know how to compute a normal")
@@ -230,15 +230,16 @@ func (o *objBox) Normal(pos *Vector) *Vector {
 
 func (o *objBox) Intersect(pos, dir *Vector) *Vector {
 	w, h, d := o.Width/2.0, o.Height/2.0, o.Depth/2.0
+	x, y, z := o.Position.Data[0], o.Position.Data[1], o.Position.Data[2]
 
-	p0 := NewVector(o.Position[0]+w, o.Position[1]+h, o.Position[2]+d)
-	p1 := NewVector(o.Position[0]-w, o.Position[1]+h, o.Position[2]+d)
-	p2 := NewVector(o.Position[0]+w, o.Position[1]-h, o.Position[2]+d)
-	p3 := NewVector(o.Position[0]-w, o.Position[1]-h, o.Position[2]+d)
-	p4 := NewVector(o.Position[0]+w, o.Position[1]+h, o.Position[2]-d)
-	p5 := NewVector(o.Position[0]-w, o.Position[1]+h, o.Position[2]-d)
-	p6 := NewVector(o.Position[0]+w, o.Position[1]-h, o.Position[2]-d)
-	p7 := NewVector(o.Position[0]-w, o.Position[1]-h, o.Position[2]-d)
+	p0 := NewVector(x+w, y+h, z+d)
+	p1 := NewVector(x-w, y+h, z+d)
+	p2 := NewVector(x+w, y-h, z+d)
+	p3 := NewVector(x-w, y-h, z+d)
+	p4 := NewVector(x+w, y+h, z-d)
+	p5 := NewVector(x-w, y+h, z-d)
+	p6 := NewVector(x+w, y-h, z-d)
+	p7 := NewVector(x-w, y-h, z-d)
 
 	var cand *Vector
 	cand = intersectSquare(pos, dir, p0, p4, p1)
