@@ -59,11 +59,12 @@ func Sub(a, b *Vector) *Vector {
 	return New(a.Data[0]-b.Data[0], a.Data[1]-b.Data[1], a.Data[2]-b.Data[2])
 }
 
-func (v *Vector) Sub(other *Vector) {
+func (v *Vector) Sub(other *Vector) *Vector {
 	v.length = nil
 	v.Data[0] -= other.Data[0]
 	v.Data[1] -= other.Data[1]
 	v.Data[2] -= other.Data[2]
+	return v
 }
 
 func Cross(a, b *Vector) *Vector {
@@ -87,13 +88,15 @@ func Normalize(a *Vector) *Vector {
 	return b
 }
 
-func (v *Vector) Normalize() {
+func (v *Vector) Normalize() *Vector {
 	l := v.Length()
 	v.Data[0] /= l
 	v.Data[1] /= l
 	v.Data[2] /= l
 	// we normalized didn't we? The length computation at the beginning will have set the length value
 	*v.length = 1.0
+
+	return v
 }
 
 func Project(u *Vector, v *Vector) *Vector {
