@@ -114,7 +114,8 @@ func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, rende
 						log.Printf("aborting pixel worker %d", i)
 						return
 					default:
-						wrld.renderPixel(pxl)
+						// This is where the magic happens: send ray to scene and determine output color.
+						pxl.col = wrld.Scene.Render(pxl.pos, pxl.dir)
 						poutc <- pxl
 					}
 				}
@@ -173,10 +174,6 @@ func imgSave(renderDir string, img *image.RGBA) (string, error) {
 
 	return filename, nil
 
-}
-
-func (wrld *World) renderPixel(pxl *pixel) {
-	pxl.col = wrld.Scene.Render(pxl.pos, pxl.dir)
 }
 
 func (wrld *World) posAndDirForPixel(x, y int) (*vec.Vector, *vec.Vector) {
