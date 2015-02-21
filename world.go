@@ -128,7 +128,7 @@ func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, rende
 	}()
 
 	img := image.NewRGBA(image.Rect(0, 0, wrld.Viewplane.ResX, wrld.Viewplane.ResY))
-	ticker := time.NewTicker(200 * time.Millisecond)
+	ticker := time.NewTicker(2 * time.Second)
 RENDER_LOOP:
 	for {
 		select {
