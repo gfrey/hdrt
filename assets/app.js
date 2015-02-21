@@ -94,6 +94,7 @@ var app = {
 
   app.initEditor = function () {
     var container = document.querySelector("#editor");
+	$("#editor").height($(window).height()*0.9);
     var options = {
        mode: 'code',
         modes: ['code', 'form', 'text', 'tree', 'view'], // allowed modes
