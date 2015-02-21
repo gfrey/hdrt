@@ -3,7 +3,6 @@ package obj
 import (
 	"encoding/json"
 	"fmt"
-	"image/color"
 
 	"github.com/gfrey/hdrt/vec"
 )
@@ -23,7 +22,7 @@ func (robj *Raw) UnmarshalJSON(data []byte) error {
 	tobj := &struct {
 		Type       string
 		Position   *vec.Vector
-		Color      *color.RGBA
+		Material   *Material
 		Properties json.RawMessage
 	}{}
 	err := json.Unmarshal(data, &tobj)
@@ -34,11 +33,11 @@ func (robj *Raw) UnmarshalJSON(data []byte) error {
 	switch tobj.Type {
 	case "sphere":
 		s := new(objSphere)
-		s.BaseObject = &BaseObject{Position: tobj.Position, Color: tobj.Color}
+		s.BaseObject = &BaseObject{Position: tobj.Position, mat: tobj.Material}
 		robj.obj = s
 	case "box":
 		b := new(objBox)
-		b.BaseObject = &BaseObject{Position: tobj.Position, Color: tobj.Color}
+		b.BaseObject = &BaseObject{Position: tobj.Position, mat: tobj.Material}
 		robj.obj = b
 	default:
 		return fmt.Errorf("type %q not supported", robj.Type)

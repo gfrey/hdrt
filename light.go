@@ -3,6 +3,7 @@ package hdrt
 import (
 	"math"
 
+	"github.com/gfrey/hdrt/obj"
 	"github.com/gfrey/hdrt/vec"
 )
 
@@ -10,24 +11,25 @@ type Light struct {
 	Position  *vec.Vector
 	Direction *vec.Vector
 	Angle     float64
-	Distance  float64
+	Diffuse   *obj.MaterialC
+	Specular  *obj.MaterialC
 }
 
-func (l *Light) InCone(pos, normal *vec.Vector) (float64, float64, *vec.Vector) {
+// Returns the emitted diffuse and specular light as color value for the given direction.
+func (l *Light) InCone(pos, normal *vec.Vector) (float64, *obj.MaterialC, *obj.MaterialC) {
 	v := vec.Sub(pos, l.Position)
 	if vec.Dot(v, normal) > 0 {
-		return 0.0, 0.0, nil
-	}
-	d := v.Length()
-	if d > l.Distance { // outside of light cone
-		return 0.0, 0.0, nil
+		return 0.0, nil, nil
 	}
 
-	cosDelta := vec.Dot(v, l.Direction) / (d * l.Direction.Length())
-	delta := math.Acos(cosDelta)
-	if delta > (deg2rad(l.Angle) / 2.0) {
-		return 0.0, 0.0, nil
+	ang := (deg2rad(l.Angle) / 2.0)
+	cosDelta := vec.Dot(v, l.Direction) / (v.Length() * l.Direction.Length())
+	delta := math.Acos(cosDelta) // outside of cone?
+	if delta > ang {
+		return 0.0, nil, nil
 	}
 
-	return d, delta, v
+	// TODO: currently the light source will emit one uniform color; that
+	//       should degrade from center to peripherie.
+	return 1.0 - (delta / ang), l.Diffuse, l.Specular
 }
