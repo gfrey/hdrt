@@ -45,7 +45,7 @@ func (sc *Scene) Render(pos, dir *vec.Vector) *color.RGBA {
 		o := sc.Objects[i]
 		p := o.Intersect(pos, dir)
 		if p != nil {
-			d := (p.Data[0] - pos.Data[0]) / dir.Data[0]
+			d := vec.Sub(p, pos).Length()
 			if cand == nil || d < distance {
 				ipos = p
 				cand = sc.Objects[i]
@@ -76,7 +76,8 @@ LIGHTSOURCES:
 				if tmpPos == nil {
 					continue
 				}
-				d := (tmpPos.Data[0] - lPos.Data[0]) / dir.Data[0]
+
+				d := vec.Sub(tmpPos, lPos).Length()
 				if d < dist { // in shadow
 					continue LIGHTSOURCES
 				}

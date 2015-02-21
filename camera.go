@@ -50,5 +50,6 @@ func (v *Viewplane) span(c *Camera) {
 }
 
 func (v *Viewplane) PixelPosition(x, y int) *vec.Vector {
-	return vec.Add(vec.Add(v.pos, vec.ScalarMultiply(v.a, float64(x)/float64(v.ResX))), vec.ScalarMultiply(v.b, float64(y)/float64(v.ResY)))
+	posX := vec.Add(v.pos, vec.ScalarMultiply(v.a, float64(x)/float64(v.ResX)))
+	return vec.Add(posX, vec.ScalarMultiply(v.b, float64(y)/float64(v.ResY)))
 }
