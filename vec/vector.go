@@ -13,6 +13,10 @@ type Vector struct {
 	length *float64
 }
 
+func (v *Vector) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &v.Data)
+}
+
 func New(x, y, z float64) *Vector {
 	v := new(Vector)
 	v.Data[0], v.Data[1], v.Data[2] = x, y, z
@@ -21,24 +25,6 @@ func New(x, y, z float64) *Vector {
 
 func (v *Vector) String() string {
 	return fmt.Sprintf("[%.2f, %.2f, %.2f]", v.Data[0], v.Data[1], v.Data[2])
-}
-
-func (v *Vector) UnmarshalJSON(data []byte) error {
-	tv := &struct {
-		X float64
-		Y float64
-		Z float64
-	}{}
-	err := json.Unmarshal(data, &tv)
-	if err != nil {
-		return err
-	}
-
-	v.Data[0] = tv.X
-	v.Data[1] = tv.Y
-	v.Data[2] = tv.Z
-
-	return nil
 }
 
 func ScalarMultiply(v *Vector, a float64) *Vector {
