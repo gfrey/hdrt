@@ -33,6 +33,9 @@ func (sc *Scene) UnmarshalJSON(data []byte) error {
 
 	sc.AmbientLight = rsc.AmbientLight
 	sc.Lights = rsc.Lights
+	for i := range sc.Lights {
+		sc.Lights[i].Direction.Normalize()
+	}
 	return nil
 }
 
