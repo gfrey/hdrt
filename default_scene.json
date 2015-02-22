@@ -1,76 +1,49 @@
 {
   "camera": {
-    "position": {
-      "x": 0,
-      "y": -1,
-      "z": 8
-    },
-    "direction": {
-      "x": 0.5,
-      "y": 0.1,
-      "z": -1
-    },
-    "up": {
-      "x": 0,
-      "y": 1,
-      "z": 0
-    },
+    "position": [0,-1,8],
+    "direction": [0.5,0.1,-1],
+    "up": [0,1,0],
     "fov": 45
   },
   "viewplane": {
     "distance": 1,
-    "resx": 1024,
-    "resy": 768
+    "resx": 800,
+    "resy": 600
   },
   "scene": {
     "objects": [
       {
-        "position": {
-          "x": 5,
-          "y": 0,
-          "z": 0
-        },
-        "color": {
-          "r": 0,
-          "g": 255,
-          "b": 0,
-          "a": 255
-        },
         "type": "sphere",
         "properties": {
           "radius": 0.75
+        },
+        "position": [5.5,0,0],
+        "material": {
+          "diffuse": [255,128,128],
+          "specular": [255,255,255],
+          "ambient": [255,0,0]
         }
       },
       {
-        "position": {
-          "x": 4,
-          "y": -1,
-          "z": -2
-        },
-        "color": {
-          "r": 255,
-          "g": 0,
-          "b": 0,
-          "a": 255
+        "position": [4,-1,-2],
+        "material": {
+          "diffuse": [128,128,128],
+          "specular": [55,55,55],
+          "ambient": [0,255,0]
         },
         "type": "box",
         "properties": {
-          "width": 0.8,
-          "height": 0.8,
-          "depth": 0.8
+          "width": 1.1,
+          "height": 1.1,
+          "depth": 1.1
         }
       },
       {
-        "position": {
-          "x": 4,
-          "y": 1,
-          "z": -2
-        },
-        "color": {
-          "r": 0,
-          "g": 0,
-          "b": 255,
-          "a": 255
+        "position": [4,1,-2],
+        "material": {
+          "diffuse": [128,128,128],
+          "specular": [55,55,55],
+          "ambient": [0,255,0]
         },
         "type": "box",
         "properties": {
@@ -80,77 +53,42 @@
         }
       }
     ],
-    "ambientlight": 0.1,
+    "ambientlight": [55,55,55],
     "lights": [
       {
-        "position": {
-          "x": 5,
-          "y": 0,
-          "z": 4
-        },
-        "direction": {
-          "x": 0,
-          "y": 0,
-          "z": -1
-        },
+        "position": [5,0,4],
+        "direction": [0,0,-1],
         "angle": 10,
-        "distance": 15
+        "diffuse":[128,128,128],
+        "specular": [128,64,64]
       },
       {
-        "position": {
-          "x": 5,
-          "y": 4,
-          "z": 4
-        },
-        "direction": {
-          "x": 0,
-          "y": -1,
-          "z": -1
-        },
+        "position": [5,4,4],
+        "direction": [0,-1,-1],
         "angle": 10,
-        "distance": 8
+        "diffuse":[128,128,128],
+        "specular": [128,64,64]
       },
       {
-        "position": {
-          "x": 4,
-          "y": 1,
-          "z": 3
-        },
-        "direction": {
-          "x": 0,
-          "y": 0,
-          "z": -1
-        },
+        "position": [4,1,3],
+        "direction": [0,0,-1],
         "angle": 10,
-        "distance": 15
+        "diffuse":[128,128,128],
+        "specular": [128,64,64]
       },
       {
-        "position": {
-          "x": 0,
-          "y": 1,
-          "z": -2
-        },
-        "direction": {
-          "x": 1,
-          "y": 0,
-          "z": 0
-        },
-        "angle": 20,
-        "distance": 12
+        "position": [0,1,-2],
+        "direction": [1,0,0],
+        "angle": 15,
+        "diffuse":[128,128,128],
+        "specular": [128,64,64]
       },
       {
-        "position": {
-          "x": 1,
-          "y": -1,
-          "z": -2
-        },
-        "direction": {
-          "x": 1,
-          "y": 0,
-          "z": 0
-        },
-        "angle": 20,
-        "distance": 12
+        "position": [1,-1,-2],
+        "direction": [1,0,0],
+        "angle": 16,
+        "diffuse":[128,128,128],
+        "specular": [128,64,64]
       }
     ]
   }
