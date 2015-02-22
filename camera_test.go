@@ -9,9 +9,11 @@ import (
 func TestViewplaneInit(t *testing.T) {
 	c := new(Camera)
 	c.Position = vec.New(0.0, 0.0, 0.0)
-	c.Direction = vec.New(1.0, 0.0, 0.0)
-	c.Up = vec.New(0.0, 1.0, 0.0)
 	c.FOV = 90.0
+	err := c.Init()
+	if err != nil {
+		t.Fatalf("failed to initialize the camera: %s", err)
+	}
 
 	v := new(Viewplane)
 	v.Distance = 1.0

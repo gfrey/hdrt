@@ -60,14 +60,6 @@ func (wrld *World) validate() error {
 		return fmt.Errorf("camera position not set")
 	}
 
-	if wrld.Camera.Direction == nil {
-		return fmt.Errorf("camera direction not set")
-	}
-
-	if wrld.Camera.Up == nil {
-		return fmt.Errorf("camera up vector not set")
-	}
-
 	if wrld.Scene == nil {
 		return fmt.Errorf("scene not set")
 	}
