@@ -18,6 +18,10 @@ func FloatGreaterThan(a, b float64) bool {
 	return FloatGreaterThanE(a, b, Epsilon)
 }
 
+func FloatGreaterThanEqual(a, b float64) bool {
+	return FloatGreaterThanEqualE(a, b, Epsilon)
+}
+
 func FloatEqualE(a, b, ε float64) bool {
 	return a-ε < b && b < a+ε
 }
@@ -32,4 +36,8 @@ func FloatLessThanEqualE(a, b, ε float64) bool {
 
 func FloatGreaterThanE(a, b, ε float64) bool {
 	return a > b-ε
+}
+
+func FloatGreaterThanEqualE(a, b, ε float64) bool {
+	return a >= b-ε
 }
