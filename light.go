@@ -3,6 +3,7 @@ package hdrt
 import (
 	"math"
 
+	"github.com/gfrey/hdrt/mat"
 	"github.com/gfrey/hdrt/obj"
 	"github.com/gfrey/hdrt/vec"
 )
@@ -22,7 +23,7 @@ func (l *Light) InCone(pos, normal *vec.Vector) (float64, *obj.Material, *obj.Ma
 		return 0.0, nil, nil
 	}
 
-	ang := (deg2rad(l.Angle) / 2.0)
+	ang := (mat.Deg2Rad(l.Angle) / 2.0)
 	cosDelta := vec.Dot(v, l.Direction) / (v.Length() * l.Direction.Length())
 	delta := math.Acos(cosDelta) // outside of cone?
 	if delta > ang {

@@ -3,6 +3,7 @@ package hdrt
 import (
 	"math"
 
+	"github.com/gfrey/hdrt/mat"
 	"github.com/gfrey/hdrt/vec"
 )
 
@@ -35,7 +36,7 @@ func (v *Viewplane) span(c *Camera) {
 	vpCenter := vec.Add(c.Position, vec.ScalarMultiply(c.Direction, v.Distance))
 
 	aspectRatio := float64(v.ResX) / float64(v.ResY)
-	alpha := deg2rad(c.FOV)
+	alpha := mat.Deg2Rad(c.FOV)
 	beta := alpha / aspectRatio
 
 	a := v.Distance * math.Tan(alpha/2.0)
