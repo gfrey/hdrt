@@ -10,14 +10,14 @@ import (
 )
 
 type Scene struct {
-	AmbientLight *obj.MaterialC
+	AmbientLight *obj.Material
 	Objects      []obj.Object `json:"objects"`
 	Lights       []*Light     `json:"lights"`
 }
 
 func (sc *Scene) UnmarshalJSON(data []byte) error {
 	rsc := &struct {
-		AmbientLight *obj.MaterialC
+		AmbientLight *obj.Material
 		Objects      []*obj.Raw
 		Lights       []*Light
 	}{}

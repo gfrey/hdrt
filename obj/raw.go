@@ -22,7 +22,7 @@ func (robj *Raw) UnmarshalJSON(data []byte) error {
 	tobj := &struct {
 		Type       string
 		Position   *vec.Vector
-		Material   *Material
+		Material   *material
 		Properties json.RawMessage
 	}{}
 	err := json.Unmarshal(data, &tobj)

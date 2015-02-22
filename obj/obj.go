@@ -9,13 +9,13 @@ import (
 type Object interface {
 	Intersect(pos *vec.Vector, dir *vec.Vector) (intersection *vec.Vector) // returns nil on no intersection
 	Normal(pos *vec.Vector) *vec.Vector
-	Material(MaterialType) *MaterialC
+	Material(MaterialType) *Material
 	Reflection() float64
 }
 
 type BaseObject struct {
 	Position *vec.Vector
-	mat      *Material `json:"material"`
+	mat      *material `json:"material"`
 }
 
 func (bo *BaseObject) Reflection() float64 {
@@ -25,7 +25,7 @@ func (bo *BaseObject) Reflection() float64 {
 	return float64(bo.mat.Reflection)
 }
 
-func (bo *BaseObject) Material(typ MaterialType) *MaterialC {
+func (bo *BaseObject) Material(typ MaterialType) *Material {
 	switch typ {
 	case MATERIAL_AMBIENT:
 		return bo.mat.Ambient
@@ -36,22 +36,4 @@ func (bo *BaseObject) Material(typ MaterialType) *MaterialC {
 	default:
 		panic(fmt.Sprintf("material type %d not supported", typ))
 	}
-}
-
-type MaterialC [3]uint
-
-type MaterialType int
-
-const (
-	MATERIAL_AMBIENT MaterialType = iota
-	MATERIAL_DIFFUSE
-	MATERIAL_SPECULAR
-)
-
-// I need to specify which wavelength of light are reflected and which are held back by the material.
-type Material struct {
-	Reflection uint8
-	Ambient    *MaterialC
-	Diffuse    *MaterialC
-	Specular   *MaterialC
 }

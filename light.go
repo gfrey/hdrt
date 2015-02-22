@@ -11,12 +11,12 @@ type Light struct {
 	Position  *vec.Vector
 	Direction *vec.Vector
 	Angle     float64
-	Diffuse   *obj.MaterialC
-	Specular  *obj.MaterialC
+	Diffuse   *obj.Material
+	Specular  *obj.Material
 }
 
 // Returns the emitted diffuse and specular light as color value for the given direction.
-func (l *Light) InCone(pos, normal *vec.Vector) (float64, *obj.MaterialC, *obj.MaterialC) {
+func (l *Light) InCone(pos, normal *vec.Vector) (float64, *obj.Material, *obj.Material) {
 	v := vec.Sub(pos, l.Position)
 	if vec.Dot(v, normal) > 0 {
 		return 0.0, nil, nil
