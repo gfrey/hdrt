@@ -1,12 +1,15 @@
 package hdrt
 
 import (
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
 	"image/png"
+	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"path"
 	"sync"
 	"time"
@@ -18,12 +21,34 @@ type World struct {
 	Camera    *Camera
 	Viewplane *Viewplane
 	Scene     *Scene
+
+	evChan chan string
+	abort  chan struct{}
 }
 
 type pixel struct {
 	x, y     int
 	col      *color.RGBA
 	pos, dir *vec.Vector
+}
+
+func LoadWorldFromFile(filename string) (*World, error) {
+	fh, err := os.Open(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file %q: %s", filename, err)
+	}
+	defer fh.Close()
+
+	return LoadWorldFromReader(fh)
+}
+
+func LoadWorldFromReader(rd io.Reader) (*World, error) {
+	wrld := new(World)
+	err := json.NewDecoder(rd).Decode(&wrld)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode world: %s", err)
+	}
+	return wrld, wrld.Init()
 }
 
 func (wrld *World) Init() error {
@@ -73,7 +98,10 @@ func (wrld *World) validate() error {
 
 const NUM_PARALLEL = 8
 
-func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, renderDir string) {
+func (wrld *World) Render() <-chan *pixel {
+	wrld.evChan = make(chan string)
+	wrld.abort = make(chan struct{})
+
 	pixelInChan := make(chan *pixel)
 	pixelOutChan := make(chan *pixel)
 	go func(pc chan<- *pixel, ac <-chan struct{}) {
@@ -91,7 +119,7 @@ func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, rende
 			}
 		}
 		close(pc)
-	}(pixelInChan, abortChan)
+	}(pixelInChan, wrld.abort)
 
 	go func() {
 		wg := new(sync.WaitGroup)
@@ -111,40 +139,48 @@ func (wrld *World) Render(evChan chan<- string, abortChan <-chan struct{}, rende
 						poutc <- pxl
 					}
 				}
-			}(wg, pixelInChan, pixelOutChan, abortChan, i)
+			}(wg, pixelInChan, pixelOutChan, wrld.abort, i)
 		}
 		log.Printf("waiting for wait group")
 		wg.Wait()
 		log.Printf("wait group closed")
 		close(pixelOutChan)
 	}()
+	return pixelOutChan
+}
 
-	img := image.NewRGBA(image.Rect(0, 0, wrld.Viewplane.ResX, wrld.Viewplane.ResY))
-	ticker := time.NewTicker(2 * time.Second)
-RENDER_LOOP:
-	for {
-		select {
-		case pxl, ok := <-pixelOutChan:
-			if !ok {
-				break RENDER_LOOP
-			}
-			img.Set(pxl.x, pxl.y, pxl.col)
-		case <-ticker.C:
-			filename, err := imgSave(renderDir, img)
-			switch err {
-			case nil:
-				evChan <- path.Base(filename)
-			default:
-				log.Printf("ERR: %s", err)
+func (wrld *World) RenderToWeb(renderDir string) <-chan string {
+
+	pixelOutChan := wrld.Render()
+	go func() {
+		img := image.NewRGBA(image.Rect(0, 0, wrld.Viewplane.ResX, wrld.Viewplane.ResY))
+		ticker := time.NewTicker(2 * time.Second)
+	RENDER_LOOP:
+		for {
+			select {
+			case pxl, ok := <-pixelOutChan:
+				if !ok {
+					break RENDER_LOOP
+				}
+				img.Set(pxl.x, pxl.y, pxl.col)
+			case <-ticker.C:
+				filename, err := imgSave(renderDir, img)
+				switch err {
+				case nil:
+					wrld.evChan <- path.Base(filename)
+				default:
+					log.Printf("ERR: %s", err)
+				}
 			}
 		}
-	}
-	filename, err := imgSave(renderDir, img)
-	if err != nil {
-		log.Printf("ERR: %s", err)
-	}
-	evChan <- path.Base(filename)
-	close(evChan)
+		filename, err := imgSave(renderDir, img)
+		if err != nil {
+			log.Printf("ERR: %s", err)
+		}
+		wrld.evChan <- path.Base(filename)
+		close(wrld.evChan)
+	}()
+	return wrld.evChan
 }
 
 func imgSave(renderDir string, img *image.RGBA) (string, error) {
@@ -173,4 +209,12 @@ func (wrld *World) posAndDirForPixel(x, y int) (*vec.Vector, *vec.Vector) {
 	dir := vec.Add(positionPixel, vec.ScalarMultiply(wrld.Camera.Position, -1.0))
 	dir.Normalize()
 	return positionPixel, dir
+}
+
+func (wrld *World) Abort() {
+	if wrld.abort != nil {
+		log.Printf("closing abort channel")
+		close(wrld.abort)
+		wrld.abort = nil
+	}
 }

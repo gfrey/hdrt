@@ -13,29 +13,30 @@ func ListenHandler(renderDir string) http.Handler {
 		err := func() error {
 			logger.Printf("web socket connection!! renderDir: %s ", renderDir)
 
+			var err error
 			var msg string
-			r := new(hdrt.Renderer)
+			var wrld *hdrt.World
 			for {
 				websocket.Message.Receive(ws, &msg)
 				switch {
 				case strings.HasPrefix(msg, "ABORT"):
-					r.Abort()
+					if wrld != nil {
+						wrld.Abort()
+					}
 				case strings.HasPrefix(msg, "CFG"):
-					r.Abort()
+					if wrld != nil {
+						wrld.Abort()
+					}
 					go func(msg string) {
 						buf := strings.NewReader(msg[3:])
-						err := r.LoadWorldFromReader(buf)
+						wrld, err = hdrt.LoadWorldFromReader(buf)
 						if err != nil {
 							WSError(ws, err)
 							return
 						}
 
 						logger.Printf("--> start rendering")
-						ch, err := r.Render(renderDir)
-						if err != nil {
-							WSError(ws, err)
-							return
-						}
+						ch := wrld.RenderToWeb(renderDir)
 
 						for imagePath := range ch {
 							logger.Printf("send image path %s", imagePath)
