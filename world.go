@@ -4,15 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
-	"image/color"
-	"image/png"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"sync"
-	"time"
 
 	"github.com/gfrey/hdrt/vec"
 )
@@ -22,14 +17,34 @@ type World struct {
 	Viewplane *Viewplane
 	Scene     *Scene
 
-	evChan chan string
-	abort  chan struct{}
+	abort chan struct{}
 }
 
-type pixel struct {
-	x, y     int
-	col      *color.RGBA
-	pos, dir *vec.Vector
+type SubImage struct {
+	Rect image.Rectangle
+	Buf  []byte
+}
+
+func (wrld *World) render(si *SubImage) {
+	ct := 0
+	si.Buf = make([]byte, 4*(si.Rect.Max.Y-si.Rect.Min.Y)*(si.Rect.Max.X-si.Rect.Min.X))
+	for y := si.Rect.Min.Y; y < si.Rect.Max.Y; y++ {
+		for x := si.Rect.Min.X; x < si.Rect.Max.X; x++ {
+			select {
+			case <-wrld.abort:
+				return
+			default:
+				// This is where the magic happens: send ray to scene and determine output color.
+				pos, dir := wrld.posAndDirForPixel(x, y)
+				col := wrld.Scene.Render(pos, dir, 0)
+				si.Buf[ct+0] = col.R
+				si.Buf[ct+1] = col.G
+				si.Buf[ct+2] = col.B
+				si.Buf[ct+3] = 255
+			}
+			ct += 4
+		}
+	}
 }
 
 func LoadWorldFromFile(filename string) (*World, error) {
@@ -98,23 +113,36 @@ func (wrld *World) validate() error {
 
 const NUM_PARALLEL = 8
 
-func (wrld *World) Render() <-chan *pixel {
-	wrld.evChan = make(chan string)
+func (wrld *World) Render() <-chan *SubImage {
 	wrld.abort = make(chan struct{})
 
-	pixelInChan := make(chan *pixel)
-	pixelOutChan := make(chan *pixel)
-	go func(pc chan<- *pixel, ac <-chan struct{}) {
-		for y := 0; y < wrld.Viewplane.ResY; y++ {
-			for x := 0; x < wrld.Viewplane.ResX; x++ {
+	pixelInChan := make(chan *SubImage)
+	pixelOutChan := make(chan *SubImage)
+	go func(pc chan<- *SubImage, ac <-chan struct{}) {
+		var (
+			xstride = wrld.Viewplane.ResX / (2 * NUM_PARALLEL)
+			ystride = wrld.Viewplane.ResY / (2 * NUM_PARALLEL)
+		)
+
+		for y := 0; y < wrld.Viewplane.ResY; y += ystride {
+			for x := 0; x < wrld.Viewplane.ResX; x += xstride {
+				si := new(SubImage)
+				xmax, ymax := x+xstride, y+ystride
+				if xmax > wrld.Viewplane.ResX {
+					xmax = wrld.Viewplane.ResX
+				}
+				if ymax > wrld.Viewplane.ResY {
+					ymax = wrld.Viewplane.ResY
+				}
+				si.Rect = image.Rect(x, y, xmax, ymax)
+
 				select {
 				case <-ac:
 					log.Printf("aborting pixel generator")
 					close(pc)
 					return
 				default:
-					pos, dir := wrld.posAndDirForPixel(x, y)
-					pc <- &pixel{x: x, y: y, pos: pos, dir: dir}
+					pc <- si
 				}
 			}
 		}
@@ -125,19 +153,12 @@ func (wrld *World) Render() <-chan *pixel {
 		wg := new(sync.WaitGroup)
 		for i := 0; i < NUM_PARALLEL; i++ {
 			wg.Add(1)
-			go func(wg *sync.WaitGroup, pinc <-chan *pixel, poutc chan<- *pixel, ac <-chan struct{}, i int) {
+			go func(wg *sync.WaitGroup, pinc <-chan *SubImage, poutc chan<- *SubImage, ac <-chan struct{}, i int) {
 				log.Printf("starting worker %d", i)
 				defer wg.Done()
-				for pxl := range pinc {
-					select {
-					case <-ac:
-						log.Printf("aborting pixel worker %d", i)
-						return
-					default:
-						// This is where the magic happens: send ray to scene and determine output color.
-						pxl.col = wrld.Scene.Render(pxl.pos, pxl.dir)
-						poutc <- pxl
-					}
+				for si := range pinc {
+					wrld.render(si)
+					poutc <- si
 				}
 			}(wg, pixelInChan, pixelOutChan, wrld.abort, i)
 		}
@@ -147,61 +168,6 @@ func (wrld *World) Render() <-chan *pixel {
 		close(pixelOutChan)
 	}()
 	return pixelOutChan
-}
-
-func (wrld *World) RenderToWeb(renderDir string) <-chan string {
-
-	pixelOutChan := wrld.Render()
-	go func() {
-		img := image.NewRGBA(image.Rect(0, 0, wrld.Viewplane.ResX, wrld.Viewplane.ResY))
-		ticker := time.NewTicker(2 * time.Second)
-	RENDER_LOOP:
-		for {
-			select {
-			case pxl, ok := <-pixelOutChan:
-				if !ok {
-					break RENDER_LOOP
-				}
-				img.Set(pxl.x, pxl.y, pxl.col)
-			case <-ticker.C:
-				filename, err := imgSave(renderDir, img)
-				switch err {
-				case nil:
-					wrld.evChan <- path.Base(filename)
-				default:
-					log.Printf("ERR: %s", err)
-				}
-			}
-		}
-		filename, err := imgSave(renderDir, img)
-		if err != nil {
-			log.Printf("ERR: %s", err)
-		}
-		wrld.evChan <- path.Base(filename)
-		close(wrld.evChan)
-	}()
-	return wrld.evChan
-}
-
-func imgSave(renderDir string, img *image.RGBA) (string, error) {
-	fh, err := ioutil.TempFile(renderDir, "img")
-	if err != nil {
-		return "", fmt.Errorf("failed to create file: %s", err)
-	}
-
-	err = png.Encode(fh, img)
-	if err != nil {
-		return "", fmt.Errorf("failed to create file: %s", err)
-	}
-
-	filename := fh.Name()
-	err = fh.Close()
-	if err != nil {
-		return "", fmt.Errorf("failed to close file: %s", err)
-	}
-
-	return filename, nil
-
 }
 
 func (wrld *World) posAndDirForPixel(x, y int) (*vec.Vector, *vec.Vector) {
