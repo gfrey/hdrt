@@ -83,16 +83,13 @@ LIGHTSOURCES:
 			dist := dir.Length()
 			dir.Normalize()
 			ln := vec.Dot(dir, normal)
-			if mat.FloatLessThan(ln, 0.0) {
-				continue
-			}
 			// is obj "visible" from light source?
 			for j := range sc.Objects {
 				if sc.Objects[j] == o {
 					continue
 				}
 
-				tmpPos := sc.Objects[j].Intersect(lPos, dir)
+				tmpPos := sc.Objects[j].Intersect(lPos, vec.ScalarMultiply(dir, -1))
 				if tmpPos == nil {
 					continue
 				}
