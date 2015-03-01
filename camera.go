@@ -20,7 +20,7 @@ type Camera struct {
 
 func (c *Camera) UnmarshalJSON(data []byte) error {
 	d := &struct {
-		Orientation [4]float64
+		Orientation [][4]float64
 		Position    *vec.Vector
 		FOV         float64
 	}{}
@@ -28,8 +28,11 @@ func (c *Camera) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	o := d.Orientation
-	c.Orientation = quat.NewRotation(vec.New(o[0], o[1], o[2]), o[3])
+	c.Orientation = quat.NewRotation(vec.New(1, 0, 0), 0)
+	for _, o := range d.Orientation {
+		r := quat.NewRotation(vec.New(o[0], o[1], o[2]), o[3])
+		c.Orientation.Multiply(r)
+	}
 	c.Position = d.Position
 	c.FOV = d.FOV
 	return nil
