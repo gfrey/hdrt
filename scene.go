@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"math"
 
+	"github.com/gfrey/hdrt/mat"
 	"github.com/gfrey/hdrt/obj"
 	"github.com/gfrey/hdrt/vec"
 )
@@ -81,6 +82,10 @@ LIGHTSOURCES:
 			dir := vec.Sub(lPos, ipos)
 			dist := dir.Length()
 			dir.Normalize()
+			ln := vec.Dot(dir, normal)
+			if mat.FloatLessThan(ln, 0.0) {
+				continue
+			}
 			// is obj "visible" from light source?
 			for j := range sc.Objects {
 				if sc.Objects[j] == o {
@@ -93,11 +98,10 @@ LIGHTSOURCES:
 				}
 
 				d := vec.Sub(tmpPos, lPos).Length()
-				if d < dist { // in shadow
+				if mat.FloatLessThan(d, dist) { // in shadow
 					continue LIGHTSOURCES
 				}
 			}
-			ln := vec.Dot(dir, normal)
 
 			mdif := o.Material(obj.MATERIAL_DIFFUSE)
 			if mdif != nil && ldif != nil {
