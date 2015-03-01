@@ -134,7 +134,7 @@ func intersectPlane(l0, l, p0, n *vec.Vector) *vec.Vector {
 			return l0
 		}
 		return nil
-	case mat.FloatGreaterThan(divisor, 0.0):
+	case mat.FloatGreaterThan(divisor, 0.0), mat.FloatGreaterThan(divident, 0.0):
 		return nil
 	default:
 		return vec.Add(l0, vec.ScalarMultiply(l, divident/divisor))
