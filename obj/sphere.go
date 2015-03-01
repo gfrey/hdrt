@@ -36,7 +36,12 @@ func (o *objSphere) Intersect(p, d *vec.Vector) *vec.Vector {
 		return nil
 	}
 
-	sqrt := math.Sqrt(o.Radius*o.Radius - lambda*lambda)
+	lSqr, rSqr := lambda*lambda, o.Radius*o.Radius
+	if mat.FloatLessThan(rSqr, lSqr) {
+		return nil
+	}
+
+	sqrt := math.Sqrt(rSqr - lSqr)
 	s1 := dDeltaP - sqrt
 	s2 := dDeltaP + sqrt
 
