@@ -26,5 +26,8 @@ func (o *objPlane) Intersect(p, r *vec.Vector) *vec.Vector {
 		return nil
 	}
 	lambda := (*o.d - vec.Dot(o.Up, p)) / nr
+	if mat.FloatLessThan(lambda, 0) {
+		return nil
+	}
 	return vec.Add(p, vec.ScalarMultiply(r, lambda))
 }
