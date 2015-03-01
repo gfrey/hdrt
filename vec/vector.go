@@ -99,11 +99,6 @@ func (v *Vector) Normalize() *Vector {
 	return v
 }
 
-func Project(u *Vector, v *Vector) *Vector {
-	vu := Dot(v, u)
-	vl := v.Length()
-	return ScalarMultiply(v, vu/vl)
-}
 
 func (v *Vector) Length() float64 {
 	if v.length == nil {
