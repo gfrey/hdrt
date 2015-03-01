@@ -15,24 +15,24 @@ type Object interface {
 
 type BaseObject struct {
 	Position *vec.Vector
-	mat      *material `json:"material"`
+	Mat      *material `json:"material"`
 }
 
 func (bo *BaseObject) Reflection() float64 {
-	if bo.mat.Reflection == 0 {
+	if bo.Mat.Reflection == 0 {
 		return 1.5
 	}
-	return float64(bo.mat.Reflection)
+	return float64(bo.Mat.Reflection)
 }
 
 func (bo *BaseObject) Material(typ MaterialType) *Material {
 	switch typ {
 	case MATERIAL_AMBIENT:
-		return bo.mat.Ambient
+		return bo.Mat.Ambient
 	case MATERIAL_DIFFUSE:
-		return bo.mat.Diffuse
+		return bo.Mat.Diffuse
 	case MATERIAL_SPECULAR:
-		return bo.mat.Specular
+		return bo.Mat.Specular
 	default:
 		panic(fmt.Sprintf("material type %d not supported", typ))
 	}

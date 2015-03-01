@@ -26,14 +26,14 @@ func Run(wrld *hdrt.World) error {
 		select {
 		case si, ok := <-sImgOutChan:
 			if !ok {
-				continue
+				break
 			}
 			img, _ := disp.AllocImage(si.Rect, disp.ScreenImage.Pix, false, draw.Nofill)
 			buf := make([]byte, 4*(si.Rect.Max.Y-si.Rect.Min.Y)*(si.Rect.Max.X-si.Rect.Min.X))
 			for y := si.Rect.Min.Y; y < si.Rect.Max.Y; y++ {
 				for x := si.Rect.Min.X; x < si.Rect.Max.X; x++ {
 					o := si.PixOffset(x, y)
-					
+
 					buf[o+0] = si.Pix[o+2]
 					buf[o+1] = si.Pix[o+1]
 					buf[o+2] = si.Pix[o+0]
@@ -51,6 +51,4 @@ func Run(wrld *hdrt.World) error {
 			}
 		}
 	}
-
-	return err
 }

@@ -37,8 +37,6 @@ func ListenHandler(renderDir string) http.Handler {
 					go renderImg(ws, msg, renderDir, &wrld)
 				}
 			}
-
-			return nil
 		}()
 
 		if err != nil {

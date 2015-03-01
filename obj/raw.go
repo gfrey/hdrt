@@ -33,15 +33,15 @@ func (robj *Raw) UnmarshalJSON(data []byte) error {
 	switch tobj.Type {
 	case "sphere":
 		s := new(objSphere)
-		s.BaseObject = &BaseObject{Position: tobj.Position, mat: tobj.Material}
+		s.BaseObject = &BaseObject{Position: tobj.Position, Mat: tobj.Material}
 		robj.obj = s
 	case "box":
 		b := new(objBox)
-		b.BaseObject = &BaseObject{Position: tobj.Position, mat: tobj.Material}
+		b.BaseObject = &BaseObject{Position: tobj.Position, Mat: tobj.Material}
 		robj.obj = b
 	case "plane":
 		b := new(objPlane)
-		b.BaseObject = &BaseObject{Position: tobj.Position, mat: tobj.Material}
+		b.BaseObject = &BaseObject{Position: tobj.Position, Mat: tobj.Material}
 		robj.obj = b
 	default:
 		return fmt.Errorf("type %q not supported", robj.Type)
