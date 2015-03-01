@@ -3,7 +3,7 @@ package server
 import (
 	"fmt"
 	"image"
-	"image/color"
+	"image/draw"
 	"image/png"
 	"io/ioutil"
 	"log"
@@ -68,13 +68,7 @@ func renderImg(ws *websocket.Conn, msg, renderDir string, wrldPtr **hdrt.World) 
 				if !ok {
 					break RENDER_LOOP
 				}
-				i := 0
-				for y := si.Rect.Min.Y; y < si.Rect.Max.Y; y++ {
-					for x := si.Rect.Min.X; x < si.Rect.Max.X; x++ {
-						img.SetRGBA(x, y, color.RGBA{si.Buf[i+0], si.Buf[i+1], si.Buf[i+2], si.Buf[i+3]})
-						i += 4
-					}
-				}
+				draw.Draw(img, si.Rect, si, si.Rect.Min, draw.Over)
 			case <-ticker.C:
 				filename, err := imgSave(renderDir, img)
 				switch err {

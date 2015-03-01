@@ -25,14 +25,25 @@ func Run(wrld *hdrt.World) error {
 	for {
 		select {
 		case si, ok := <-sImgOutChan:
-			if !ok { continue }
-			img, _ := disp.AllocImage(si.Rect, disp.ScreenImage.Pix, false, 0)
-			_, err := img.Load(si.Rect, si.Buf)
-			if err != nil {
-				return err
+			if !ok {
+				continue
 			}
+			img, _ := disp.AllocImage(si.Rect, disp.ScreenImage.Pix, false, draw.Nofill)
+			buf := make([]byte, 4*(si.Rect.Max.Y-si.Rect.Min.Y)*(si.Rect.Max.X-si.Rect.Min.X))
+			for y := si.Rect.Min.Y; y < si.Rect.Max.Y; y++ {
+				for x := si.Rect.Min.X; x < si.Rect.Max.X; x++ {
+					o := si.PixOffset(x, y)
+					
+					buf[o+0] = si.Pix[o+2]
+					buf[o+1] = si.Pix[o+1]
+					buf[o+2] = si.Pix[o+0]
+					buf[o+3] = si.Pix[o+3]
+				}
+			}
+			img.Load(si.Rect, buf)
 			disp.ScreenImage.Draw(si.Rect, img, nil, si.Rect.Min)
 			disp.Flush()
+			img.Free()
 		case c := <-kbdIn.C:
 			if c == 'q' {
 				wrld.Abort()
