@@ -10,7 +10,7 @@ type Object interface {
 	Intersect(pos *vec.Vector, dir *vec.Vector) (intersection *vec.Vector) // returns nil on no intersection
 	Normal(pos *vec.Vector) *vec.Vector
 	Material(MaterialType) *Material
-	Reflection() float64
+	Reflection() uint8
 }
 
 type BaseObject struct {
@@ -18,11 +18,11 @@ type BaseObject struct {
 	Mat      *material `json:"material"`
 }
 
-func (bo *BaseObject) Reflection() float64 {
-	if bo.Mat.Reflection == 0 {
-		return 1.5
+func (bo *BaseObject) Reflection() uint8 {
+	if bo.Mat.Reflection < 2 {
+		return 2
 	}
-	return float64(bo.Mat.Reflection)
+	return bo.Mat.Reflection
 }
 
 func (bo *BaseObject) Material(typ MaterialType) *Material {
