@@ -30,7 +30,7 @@ func (o *objBox) Normal(pos *vec.Vector) *vec.Vector {
 	panic("don't know how to compute a normal")
 }
 
-func (o *objBox) Intersect(pos, dir *vec.Vector) *vec.Vector {
+func (o *objBox) Intersect(pos, dir *vec.Vector) (float64, *vec.Vector) {
 	w, h, d := o.Width/2.0, o.Height/2.0, o.Depth/2.0
 	x, y, z := o.Position.Data[0], o.Position.Data[1], o.Position.Data[2]
 
@@ -44,49 +44,50 @@ func (o *objBox) Intersect(pos, dir *vec.Vector) *vec.Vector {
 	p7 := vec.New(x-w, y-h, z-d)
 
 	var cand *vec.Vector
-	cand = intersectSquare(pos, dir, p0, p4, p1)
+	var l float64
+	l, cand = intersectSquare(pos, dir, p0, p4, p1)
 	if cand != nil {
-		return cand
+		return l, cand
 	}
 
-	cand = intersectSquare(pos, dir, p0, p1, p2)
+	l, cand = intersectSquare(pos, dir, p0, p1, p2)
 	if cand != nil {
-		return cand
+		return l, cand
 	}
 
-	cand = intersectSquare(pos, dir, p0, p2, p4)
+	l, cand = intersectSquare(pos, dir, p0, p2, p4)
 	if cand != nil {
-		return cand
+		return l, cand
 	}
 
-	cand = intersectSquare(pos, dir, p7, p5, p6)
+	l, cand = intersectSquare(pos, dir, p7, p5, p6)
 	if cand != nil {
-		return cand
+		return l, cand
 	}
 
-	cand = intersectSquare(pos, dir, p7, p6, p3)
+	l, cand = intersectSquare(pos, dir, p7, p6, p3)
 	if cand != nil {
-		return cand
+		return l, cand
 	}
 
-	cand = intersectSquare(pos, dir, p7, p3, p5)
+	l, cand = intersectSquare(pos, dir, p7, p3, p5)
 	if cand != nil {
-		return cand
+		return l, cand
 	}
 
-	return nil
+	return 0, nil
 }
 
-func intersectSquare(l0, l, p0, p1, p2 *vec.Vector) *vec.Vector {
+func intersectSquare(l0, l, p0, p1, p2 *vec.Vector) (float64, *vec.Vector) {
 	a := vec.Sub(p1, p0)
 	b := vec.Sub(p2, p0)
-	normal := vec.Cross(a, b)
-	normal.Normalize()
-	cand := intersectPlane(l0, l, p0, normal)
+	normal := vec.Cross(a, b).Normalize()
+
+	la, cand := intersectPlane(l0, l, p0, normal)
 	if cand != nil && pointInPlane(a, b, vec.Sub(cand, p0)) {
-		return cand
+		return la, cand
 	}
-	return nil
+	return 0, nil
 }
 
 // point w in plane opened by u and v (from origin) (can be reused for triangles with r+t < 1.0)
@@ -95,7 +96,7 @@ func pointInPlane(u, v, w *vec.Vector) bool {
 	vCrossU := vec.Cross(v, u)
 
 	// Test sign of r
-	if vec.Dot(vCrossW, vCrossU) < 0.0 {
+	if mat.FloatLessThan(vec.Dot(vCrossW, vCrossU), 0.0) {
 		return false
 	}
 
@@ -103,7 +104,7 @@ func pointInPlane(u, v, w *vec.Vector) bool {
 	uCrossV := vec.Cross(u, v)
 
 	// Test sign of t
-	if vec.Dot(uCrossW, uCrossV) < 0.0 {
+	if mat.FloatLessThan(vec.Dot(uCrossW, uCrossV), 0.0) {
 		return false
 	}
 
@@ -113,7 +114,7 @@ func pointInPlane(u, v, w *vec.Vector) bool {
 	r := vCrossW.Length() / denom
 	t := uCrossW.Length() / denom
 
-	return mat.FloatLessThan(r, 1.0) && mat.FloatLessThan(t, 1.0)
+	return mat.FloatLessThanEqual(r, 1.0) && mat.FloatLessThanEqual(t, 1.0)
 }
 
 // l0 point on the ray
@@ -124,19 +125,22 @@ func pointInPlane(u, v, w *vec.Vector) bool {
 // d := (p0 - l0) * n / l * n
 // if divisor is zero the line is parallel to the plane
 // if divisor and divident are zero line is contained in plane
-func intersectPlane(l0, l, p0, n *vec.Vector) *vec.Vector {
-	divident := vec.Dot(vec.Sub(p0, l0), n)
-	divisor := vec.Dot(l, n)
+func intersectPlane(l0, l, p0, n *vec.Vector) (float64, *vec.Vector) {
+	d := vec.Dot(n, p0)
+
+	divident := d - vec.Dot(n, l0)
+	divisor := vec.Dot(n, l)
 
 	switch {
 	case mat.FloatEqual(divisor, 0.0):
 		if mat.FloatEqual(divident, 0.0) {
-			return l0
+			return 0, l0
 		}
-		return nil
+		return 0, nil
 	case mat.FloatGreaterThan(divisor, 0.0), mat.FloatGreaterThan(divident, 0.0):
-		return nil
+		return 0, nil
 	default:
-		return vec.Add(l0, vec.ScalarMultiply(l, divident/divisor))
+		d := divident / divisor
+		return d, vec.Add(l0, vec.ScalarMultiply(l, d))
 	}
 }

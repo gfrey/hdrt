@@ -28,7 +28,7 @@ func (c *Camera) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	c.Orientation = quat.NewRotation(vec.New(1, 0, 0), 0)
+	c.Orientation = quat.NewRotation(vec.UnitX, 0)
 	for _, o := range d.Orientation {
 		r := quat.NewRotation(vec.New(o[0], o[1], o[2]), o[3])
 		c.Orientation.Multiply(r)

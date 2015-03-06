@@ -13,7 +13,8 @@ and point your browser to (http://localhost:3000). Copy the scene given in the d
 
 ## Current Issues
 
-* sphere doesn't cast shadows
+* ~~sphere doesn't cast shadows~~
+* sphere doesn't have a reflection
 * add basic object graph
 * read blender files
 * improve render equation to include reflection and refraction

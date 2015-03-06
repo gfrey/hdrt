@@ -14,13 +14,13 @@ func TestBoxIntersection(t *testing.T) {
 		Depth:      1.0,
 	}
 
-	i1 := b.Intersect(vec.New(0.0, 0.0, 0.0), vec.New(1.0, 0.0, 0.0))
+	_, i1 := b.Intersect(vec.New(0.0, 0.0, 0.0), vec.New(1.0, 0.0, 0.0))
 	i1Exp := vec.New(1.5, 0.0, 0.0)
 	if i1 == nil || !vec.Equal(i1, i1Exp) {
 		t.Errorf("expected i1 to be %s, got %s", i1Exp, i1)
 	}
 
-	i2 := b.Intersect(vec.New(0.0, 5.0, 0.0), vec.New(1.0, 0.0, 0.0))
+	_, i2 := b.Intersect(vec.New(0.0, 5.0, 0.0), vec.New(1.0, 0.0, 0.0))
 	if i2 != nil {
 		t.Errorf("expected i2 to be nil, got %s", i2)
 	}
@@ -51,7 +51,7 @@ func TestIntersectPlane(t *testing.T) {
 	}
 
 	for i := range tt {
-		cand := intersectPlane(r_pos, r_dir, tt[i].p0, tt[i].n)
+		_, cand := intersectPlane(r_pos, r_dir, tt[i].p0, tt[i].n)
 		if !vec.Equal(cand, tt[i].exp) {
 			t.Errorf("expected test %d to have %s, got %s", i, tt[i].exp, cand)
 		}
@@ -91,9 +91,9 @@ func TestPointInPlane(t *testing.T) {
 		got := pointInPlane(tt[i].a, tt[i].b, tt[i].c)
 		if got != tt[i].exp {
 			if tt[i].exp {
-				t.Errorf("expected point %s to be in plane, wasn't", tt[i].c)
+				t.Errorf("[%d] expected point %s to be in plane, wasn't", i, tt[i].c)
 			} else {
-				t.Errorf("expected point %s to not be in plane, was", tt[i].c)
+				t.Errorf("[%d] expected point %s to not be in plane, was", i, tt[i].c)
 			}
 		}
 	}

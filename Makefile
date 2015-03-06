@@ -11,5 +11,6 @@ dev: build
 	go-reload hdrt server
 	
 
-render: build
+render:
+	go get ./...
 	hdrt render default_scene.json

@@ -7,7 +7,7 @@ import (
 )
 
 type Object interface {
-	Intersect(pos *vec.Vector, dir *vec.Vector) (intersection *vec.Vector) // returns nil on no intersection
+	Intersect(pos, dir *vec.Vector) (float64, *vec.Vector) // returns nil on no intersection
 	Normal(pos *vec.Vector) *vec.Vector
 	Material(MaterialType) *Material
 	Reflection() uint8

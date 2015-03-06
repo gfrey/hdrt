@@ -28,7 +28,7 @@ func TestSceneDescription(t *testing.T) {
 		t.Errorf("scene not set")
 	}
 
-	if len(wrld.Scene.Objects) != 3 {
-		t.Errorf("expected %d objects, got %d", 3, len(wrld.Scene.Objects))
+	if len(wrld.Scene.Objects) != 4 {
+		t.Errorf("expected %d objects, got %d", 4, len(wrld.Scene.Objects))
 	}
 }

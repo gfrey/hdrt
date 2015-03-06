@@ -53,7 +53,7 @@ func TestPlaneIntersection(t *testing.T) {
 			Up:         tt[i].Up,
 		}
 
-		got := p.Intersect(tt[i].RPos, tt[i].RDir)
+		_, got := p.Intersect(tt[i].RPos, tt[i].RDir)
 
 		if !vec.Equal(got, tt[i].Exp) {
 			t.Errorf("in test %d %s was expected, got %s", i+1, tt[i].Exp, got)

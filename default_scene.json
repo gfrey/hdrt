@@ -5,7 +5,7 @@
     "fov": 45
   },
   "viewplane": {
-    "distance": 1,
+    "distance": 1, 
     "resx": 800,
     "resy": 600
   },
@@ -18,7 +18,7 @@
         },
         "position": [0,0,0],
         "material": {
-          "reflection": 16,
+          "reflection": 32,
           "diffuse": [32,32,32],
           "specular": [32,32,32],
           "ambient": [56,56,56]
@@ -38,6 +38,19 @@
         }
       },
       {
+        "type": "sphere",
+        "properties": {
+          "radius": 0.4
+        },
+        "position": [8,0.4,0],
+        "material": {
+          "reflection": 96,
+          "diffuse": [128,128,32],
+          "specular": [128,128,128],
+          "ambient": [128,128,32]
+        }
+      },
+      {
         "type": "box",
         "position": [10,0.6,-1.5],
         "properties": {
@@ -53,7 +66,7 @@
         }
       }
     ],
-    "ambientlight": [32,32,32],
+    "ambientlight": [64,64,64],
     "lights": [
       {
         "position": [15,5,5],

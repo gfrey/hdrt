@@ -10,7 +10,7 @@ import (
 	"github.com/gfrey/hdrt/vec"
 )
 
-const MAX_STEPS = 4
+const MAX_STEPS = 8
 
 type Scene struct {
 	AmbientLight *obj.Material
@@ -57,10 +57,9 @@ func (sc *Scene) render(pos, dir *vec.Vector, step uint) *color.RGBA {
 	)
 	for i := range sc.Objects {
 		o := sc.Objects[i]
-		p := o.Intersect(pos, dir)
+		d, p := o.Intersect(pos, dir)
 		if p != nil {
-			d := vec.Sub(p, pos).Length()
-			if cand == nil || d < distance {
+			if cand == nil || mat.FloatLessThan(d, distance) {
 				ipos = p
 				cand = sc.Objects[i]
 				distance = d
@@ -92,7 +91,7 @@ func sumColorChans(a, b, c uint8) uint8 {
 
 func (sc *Scene) Reflect(o obj.Object, ipos, spos *vec.Vector, step uint) *color.RGBA {
 	n := o.Normal(ipos)
-	i := vec.Sub(ipos, spos)
+	i := vec.Sub(ipos, spos).Normalize()
 	r := vec.Sub(i, vec.ScalarMultiply(n, 2*vec.Dot(i, n)))
 
 	col := sc.render(ipos, r, step+1)
@@ -132,12 +131,11 @@ LIGHTSOURCES:
 					continue
 				}
 
-				tmpPos := sc.Objects[j].Intersect(lPos, vec.ScalarMultiply(dir, -1))
+				d, tmpPos := sc.Objects[j].Intersect(lPos, vec.ScalarMultiply(dir, -1))
 				if tmpPos == nil {
 					continue
 				}
 
-				d := vec.Sub(tmpPos, lPos).Length()
 				if mat.FloatLessThan(d, dist) { // in shadow
 					continue LIGHTSOURCES
 				}

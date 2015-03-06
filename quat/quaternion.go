@@ -1,6 +1,7 @@
 package quat
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/gfrey/hdrt/mat"
@@ -9,72 +10,82 @@ import (
 
 // Xi+Yj+Zk+W
 type Quaternion struct {
-	X, Y, Z, W float64
-	conj       *Quaternion
+	Data [4]float64
+	conj *Quaternion
+}
+
+func (q *Quaternion) String() string {
+	return fmt.Sprintf("[%.3f,%.3f,%.3f|%.3f]", q.Data[0], q.Data[1], q.Data[2], q.Data[3])
 }
 
 func New(x, y, z, w float64) *Quaternion {
+	return &Quaternion{Data: [4]float64{x, y, z, w}}
+}
+
+func Copy(a *Quaternion) *Quaternion {
 	q := new(Quaternion)
-	q.X, q.Y, q.Z, q.W = x, y, z, w
+	q.Data[0] = a.Data[0]
+	q.Data[1] = a.Data[1]
+	q.Data[2] = a.Data[2]
+	q.Data[3] = a.Data[3]
 	return q
 }
 
 func NewRotation(axis *vec.Vector, angle float64) *Quaternion {
-	a := *axis
-	a.Normalize()
-	q := new(Quaternion)
-	α := mat.Deg2Rad(angle) / 2.0
+	a := vec.Copy(axis).Normalize()
+	α := mat.Deg2Rad(angle) * 0.5
 	sin := math.Sin(α)
 	a.ScalarMultiply(sin)
-	q.X, q.Y, q.Z = a.Data[0], a.Data[1], a.Data[2]
-	q.W = math.Cos(α)
-	return q
+	return New(a.Data[0], a.Data[1], a.Data[2], math.Cos(α))
 }
 
 func Add(a, b *Quaternion) *Quaternion {
-	q := new(Quaternion)
-	*q = *a
-	q.X += b.X
-	q.Y += b.Y
-	q.Z += b.Z
-	q.W += b.W
+	q := Copy(a)
+	q.Data[0] += b.Data[0]
+	q.Data[1] += b.Data[1]
+	q.Data[2] += b.Data[2]
+	q.Data[3] += b.Data[3]
+	return q
+}
+
+func (q *Quaternion) Normalize() *Quaternion {
+	sum := 0.0
+	for i := 0; i < 4; i++ {
+		sum += q.Data[i] * q.Data[i]
+	}
+	sum = 1 / sum
+	for i := 0; i < 4; i++ {
+		q.Data[i] *= sum
+	}
 	return q
 }
 
 func (q *Quaternion) Multiply(b *Quaternion) *Quaternion {
-	x, y, z, w := q.X, q.Y, q.Z, q.W
-	q.W = w*b.W - x*b.X - y*b.Y - z*b.Z
-	q.X = w*b.X + x*b.W + y*b.Z - z*b.Y
-	q.Y = w*b.Y - x*b.Z + y*b.W + z*b.X
-	q.Z = w*b.Z + x*b.Y - y*b.X + z*b.W
+	var tmp [4]float64 = q.Data
+	q.Data[3] = tmp[3]*b.Data[3] - tmp[0]*b.Data[0] - tmp[1]*b.Data[1] - tmp[2]*b.Data[2]
+	q.Data[0] = tmp[3]*b.Data[0] + tmp[0]*b.Data[3] + tmp[1]*b.Data[2] - tmp[2]*b.Data[1]
+	q.Data[1] = tmp[3]*b.Data[1] - tmp[0]*b.Data[2] + tmp[1]*b.Data[3] + tmp[2]*b.Data[0]
+	q.Data[2] = tmp[3]*b.Data[2] + tmp[0]*b.Data[1] - tmp[1]*b.Data[0] + tmp[2]*b.Data[3]
 	return q
 }
 
 func Multiply(a, b *Quaternion) *Quaternion {
-	q := new(Quaternion)
-	q.W = a.W*b.W - a.X*b.X - a.Y*b.Y - a.Z*b.Z
-	q.X = a.W*b.X + a.X*b.W + a.Y*b.Z - a.Z*b.Y
-	q.Y = a.W*b.Y - a.X*b.Z + a.Y*b.W + a.Z*b.X
-	q.Z = a.W*b.Z + a.X*b.Y - a.Y*b.X + a.Z*b.W
-	return q
+	q := New(a.Data[0], a.Data[1], a.Data[2], a.Data[3])
+	return q.Multiply(b)
 }
 
 func Square(a *Quaternion) *Quaternion {
 	q := new(Quaternion)
-	q.W = a.W*a.W - a.X*a.X - a.Y*a.Y - a.Z*a.Z
-	q.X = 2.0 * a.W * a.X
-	q.Y = 2.0 * a.W * a.Y
-	q.Z = 2.0 * a.W * a.Z
+	q.Data[3] = a.Data[3]*a.Data[3] - a.Data[0]*a.Data[0] - a.Data[1]*a.Data[1] - a.Data[2]*a.Data[2]
+	t := 2.0 * a.Data[3]
+	q.Data[0] = t * a.Data[0]
+	q.Data[1] = t * a.Data[1]
+	q.Data[2] = t * a.Data[2]
 	return q
 }
 
 func Conjugate(a *Quaternion) *Quaternion {
-	q := new(Quaternion)
-	q.W = a.W
-	q.X = -a.X
-	q.Y = -a.Y
-	q.Z = -a.Z
-	return q
+	return New(-a.Data[0], -a.Data[1], -a.Data[2], a.Data[3])
 }
 
 func (q *Quaternion) Rotate(v *vec.Vector) *vec.Vector {
@@ -82,10 +93,23 @@ func (q *Quaternion) Rotate(v *vec.Vector) *vec.Vector {
 		q.conj = Conjugate(q)
 	}
 
-	vp := new(Quaternion)
-	vp.X, vp.Y, vp.Z = v.Data[0], v.Data[1], v.Data[2]
-
+	vp := New(v.Data[0], v.Data[1], v.Data[2], 0.0)
 	res := Multiply(q, vp).Multiply(q.conj)
+	return vec.New(res.Data[0], res.Data[1], res.Data[2])
+}
 
-	return vec.New(res.X, res.Y, res.Z)
+func Equal(a, b *Quaternion) bool {
+	switch {
+	case a == nil && b == nil:
+		return true
+	case a == nil, b == nil:
+		return false
+	default:
+		for i := 0; i < 4; i++ {
+			if !mat.FloatEqual(a.Data[i], b.Data[i]) {
+				return false
+			}
+		}
+		return true
+	}
 }

@@ -18,10 +18,10 @@ func TestQuaternionAdd(t *testing.T) {
 		got float64
 		msg string
 	}{
-		{2.0, c.X, "X"},
-		{3.0, c.Y, "Y"},
-		{4.0, c.Z, "Z"},
-		{5.0, c.W, "W"},
+		{2.0, c.Data[0], "X"},
+		{3.0, c.Data[1], "Y"},
+		{4.0, c.Data[2], "Z"},
+		{5.0, c.Data[3], "W"},
 	}
 
 	epsilon := math.Nextafter(1, 2) - 1
@@ -66,17 +66,8 @@ func TestQuaternionMultiply(t *testing.T) {
 	}
 
 	for i := range d {
-		if d[i].got.X < d[i].exp.X-epsilon || d[i].exp.X+epsilon < d[i].got.X {
-			t.Errorf("expected %s's X value to be %.6f, got %.6f", d[i].msg, d[i].exp.X, d[i].got.X)
-		}
-		if d[i].got.Y < d[i].exp.Y-epsilon || d[i].exp.Y+epsilon < d[i].got.Y {
-			t.Errorf("expected %s's Y value to be %.6f, got %.6f", d[i].msg, d[i].exp.Y, d[i].got.Y)
-		}
-		if d[i].got.Z < d[i].exp.Z-epsilon || d[i].exp.Z+epsilon < d[i].got.Z {
-			t.Errorf("expected %s's Z value to be %.6f, got %.6f", d[i].msg, d[i].exp.Z, d[i].got.Z)
-		}
-		if d[i].got.W < d[i].exp.W-epsilon || d[i].exp.W+epsilon < d[i].got.W {
-			t.Errorf("expected %s's W value to be %.6f, got %.6f", d[i].msg, d[i].exp.W, d[i].got.W)
+		if !Equal(d[i].got, d[i].exp) {
+			t.Errorf("in %s expected %s, got %s", d[i].msg, d[i].exp, d[i].got)
 		}
 	}
 }
@@ -95,17 +86,8 @@ func TestQuaternionS(t *testing.T) {
 	}
 
 	for i := range d {
-		if d[i].got.X < d[i].exp.X-epsilon || d[i].exp.X+epsilon < d[i].got.X {
-			t.Errorf("expected %s's X value to be %.6f, got %.6f", d[i].msg, d[i].exp.X, d[i].got.X)
-		}
-		if d[i].got.Y < d[i].exp.Y-epsilon || d[i].exp.Y+epsilon < d[i].got.Y {
-			t.Errorf("expected %s's Y value to be %.6f, got %.6f", d[i].msg, d[i].exp.Y, d[i].got.Y)
-		}
-		if d[i].got.Z < d[i].exp.Z-epsilon || d[i].exp.Z+epsilon < d[i].got.Z {
-			t.Errorf("expected %s's Z value to be %.6f, got %.6f", d[i].msg, d[i].exp.Z, d[i].got.Z)
-		}
-		if d[i].got.W < d[i].exp.W-epsilon || d[i].exp.W+epsilon < d[i].got.W {
-			t.Errorf("expected %s's W value to be %.6f, got %.6f", d[i].msg, d[i].exp.W, d[i].got.W)
+		if !Equal(d[i].got, d[i].exp) {
+			t.Errorf("in %s expected %s, got %s", d[i].msg, d[i].exp, d[i].got)
 		}
 	}
 }
@@ -128,7 +110,7 @@ func TestQuaternionRotation(t *testing.T) {
 		got := tt[i].q.Rotate(tt[i].v)
 
 		if !vec.Equal(got, tt[i].exp) {
-			t.Errorf("expected rotated vector to be %s, got %s", tt[i].exp, got)
+			t.Errorf("in test %d expected rotated vector to be %s, got %s", i, tt[i].exp, got)
 		}
 	}
 

@@ -1,43 +1,35 @@
 package mat
 
-const Epsilon = 0.0001
+import "math"
+
+var ε float64 = 1e-12
 
 func FloatEqual(a, b float64) bool {
-	return FloatEqualE(a, b, Epsilon)
+	absA, absB := math.Abs(a), math.Abs(b)
+	diff := math.Abs(a - b)
+
+	switch {
+	case a == b:
+		return true
+	case a == 0, b == 0, diff < math.Nextafter(1.0, 2.0)-1.0:
+		return diff < ε
+	default:
+		return diff/(absA+absB) < ε
+	}
 }
 
 func FloatLessThan(a, b float64) bool {
-	return FloatLessThanE(a, b, Epsilon)
+	return a < b
 }
 
 func FloatLessThanEqual(a, b float64) bool {
-	return FloatLessThanEqualE(a, b, Epsilon)
+	return a < b || FloatEqual(a, b)
 }
 
 func FloatGreaterThan(a, b float64) bool {
-	return FloatGreaterThanE(a, b, Epsilon)
+	return a > b
 }
 
 func FloatGreaterThanEqual(a, b float64) bool {
-	return FloatGreaterThanEqualE(a, b, Epsilon)
-}
-
-func FloatEqualE(a, b, ε float64) bool {
-	return a-ε < b && b < a+ε
-}
-
-func FloatLessThanE(a, b, ε float64) bool {
-	return a < b+ε
-}
-
-func FloatLessThanEqualE(a, b, ε float64) bool {
-	return a <= b+ε
-}
-
-func FloatGreaterThanE(a, b, ε float64) bool {
-	return a > b-ε
-}
-
-func FloatGreaterThanEqualE(a, b, ε float64) bool {
-	return a >= b-ε
+	return a > b || FloatEqual(a, b)
 }

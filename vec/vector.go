@@ -13,6 +13,12 @@ type Vector struct {
 	length *float64
 }
 
+var (
+	UnitX *Vector = New(1, 0, 0)
+	UnitY *Vector = New(0, 1, 0)
+	UnitZ *Vector = New(0, 0, 1)
+)
+
 func (v *Vector) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &v.Data)
 }
@@ -23,8 +29,16 @@ func New(x, y, z float64) *Vector {
 	return v
 }
 
+func Copy(a *Vector) *Vector {
+	v := new(Vector)
+	for i := 0; i < 3; i++ {
+		v.Data[i] = a.Data[i]
+	}
+	return v
+}
+
 func (v *Vector) String() string {
-	return fmt.Sprintf("[%.2f, %.2f, %.2f]", v.Data[0], v.Data[1], v.Data[2])
+	return fmt.Sprintf("[%.16f, %.16f, %.16f]", v.Data[0], v.Data[1], v.Data[2])
 }
 
 func ScalarMultiply(v *Vector, a float64) *Vector {
@@ -99,7 +113,6 @@ func (v *Vector) Normalize() *Vector {
 	return v
 }
 
-
 func (v *Vector) Length() float64 {
 	if v.length == nil {
 		v.length = new(float64)
@@ -119,8 +132,11 @@ func Equal(a, b *Vector) bool {
 	case a == nil, b == nil:
 		return false
 	default:
-		return mat.FloatEqual(a.Data[0], b.Data[0]) &&
-			mat.FloatEqual(a.Data[1], b.Data[1]) &&
-			mat.FloatEqual(a.Data[2], b.Data[2])
+		for i := 0; i < 3; i++ {
+			if !mat.FloatEqual(a.Data[i], b.Data[i]) {
+				return false
+			}
+		}
+		return true
 	}
 }
